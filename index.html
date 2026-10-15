@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Copy Trading</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{color-scheme:light dark}*{box-sizing:border-box}
+body{margin:0;padding:24px 18px;font-family:system-ui,sans-serif;background:var(--tg-theme-bg-color,#111827);color:var(--tg-theme-text-color,#f9fafb)}
+main{max-width:520px;margin:auto}.brand{font-size:13px;letter-spacing:.16em;opacity:.7;font-weight:700}
+h1{font-size:28px;margin:10px 0 8px}p{color:var(--tg-theme-hint-color,#9ca3af);line-height:1.5}
+.card{margin-top:24px;padding:20px;border-radius:18px;background:var(--tg-theme-secondary-bg-color,#1f2937)}
+.status{display:inline-block;border-radius:999px;padding:6px 10px;background:#334155;font-size:12px}
+button{width:100%;border:0;border-radius:12px;padding:14px;font-size:15px;font-weight:700;margin-top:18px;color:var(--tg-theme-button-text-color,#fff);background:var(--tg-theme-button-color,#2563eb)}
+</style>
+</head>
+<body>
+<main>
+<div class="brand">COPY TRADING</div>
+<h1>Bienvenue 👋</h1>
+<p>Ton espace de copy trading sera construit ici, étape par étape.</p>
+<section class="card">
+<span class="status">Prototype — aucun compte connecté</span>
+<h2>Mon tableau de bord</h2>
+<p>Le solde, les performances et l'état du copier apparaîtront ici une fois les connexions sécurisées développées.</p>
+<button id="close">Fermer</button>
+</section>
+</main>
+<script>
+const tg=window.Telegram&&window.Telegram.WebApp;
+if(tg){tg.ready();tg.expand();document.getElementById("close").addEventListener("click",()=>tg.close());}
+else{document.getElementById("close").textContent="Page de test";document.getElementById("close").addEventListener("click",()=>alert("Mini App de démonstration"));}
+</script>
+</body>
+</html>
