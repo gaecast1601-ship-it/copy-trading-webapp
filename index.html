@@ -1,47 +1,111 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#10131b">
-<title>Copy Trading — Administration</title><script src="https://telegram.org/js/telegram-web-app.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Copy Trading</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{color-scheme:dark;--bg:#10131b;--panel:#191e2a;--panel2:#202737;--text:#f5f7fb;--muted:#9ca7ba;--line:#2b3445;--accent:#83e0bb;--red:#ff8791;--amber:#f3c777}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}main{max-width:900px;margin:auto;padding:22px 16px 35px}.top,.section-head,.client-top{display:flex;justify-content:space-between;align-items:center;gap:12px}.top{align-items:flex-start;margin-bottom:20px}.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}h1{font-size:26px;margin:5px 0}h2{font-size:15px;margin:0}.sub,.muted,.client-id{color:var(--muted);font-size:12px;line-height:1.5}.pill,.state,.chip{display:inline-block;border-radius:9px;padding:6px 9px;font-size:11px;font-weight:750}.pill{border:1px solid var(--line);color:var(--amber);background:var(--panel)}.notice{border:1px solid #5c4b2e;background:#2a2419;color:#f4d9a2;border-radius:14px;padding:12px 14px;font-size:12px;line-height:1.5;margin:16px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card,.client{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;min-width:0}.metric-label{color:var(--muted);font-size:12px;margin-bottom:8px}.metric{font-size:27px;font-weight:800}.metric-note{font-size:11px;color:var(--muted);margin-top:6px}.section-head{margin:22px 0 10px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:20px 0}.tabs button{width:100%}button,input,select{font:inherit}button{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 13px;border-radius:10px;font-weight:750;font-size:12px;cursor:pointer}button.primary,.active-tab{background:var(--accent);color:#102019;border-color:var(--accent)}button.danger{color:var(--red)}.hidden{display:none!important}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;color:var(--muted);font-size:11px;font-weight:700;margin-bottom:6px}input,select{width:100%;background:#111722;border:1px solid var(--line);border-radius:9px;padding:11px;color:var(--text)}.full{grid-column:1/-1}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.actions button{flex:1}.client-list{display:flex;flex-direction:column;gap:10px}.client-name{font-size:13px;font-weight:800;overflow-wrap:anywhere}.state{background:#19372e;color:var(--accent)}.state.off{background:#3b2027;color:var(--red)}.chip{border:1px solid var(--line);color:#c7d0df;margin:9px 5px 0 0}.guard{border:1px solid #305744;background:#172a24;border-radius:12px;padding:13px;font-size:12px;line-height:1.6;margin-top:10px}.empty{text-align:center;color:var(--muted);padding:20px;border:1px dashed var(--line);border-radius:12px;font-size:12px}#toast{color:var(--accent);font-size:12px;margin-top:12px;min-height:18px}.footer{text-align:center;color:#768197;font-size:10px;line-height:1.5;padding:22px 10px 4px}@media(max-width:480px){.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.tabs{grid-template-columns:1fr 1fr 1fr}h1{font-size:23px}}
-</style></head>
-<body><main>
-<header class="top"><div><div class="eyebrow">Copy Trading</div><h1>Administration</h1><div class="sub">Gestion des clients, sources et accès</div></div><div class="pill">● Mode démo</div></header>
-<div class="notice"><strong>Maquette de démonstration.</strong> Les modifications restent dans cette page et ne sont pas encore enregistrées sur le serveur. N'utilise pas cette interface seule pour autoriser de vrais comptes.</div>
-<section class="grid"><div class="card"><div class="metric-label">Clients dans cette démo</div><div class="metric" id="count">2</div><div class="metric-note">Liste locale</div></div><div class="card"><div class="metric-label">Clients actifs</div><div class="metric" id="active">2</div><div class="metric-note">Accès fictifs</div></div></section>
-<nav class="tabs"><button class="active-tab" data-tab="clients">Clients</button><button data-tab="admins">Administrateurs</button><button data-tab="security">Sécurité</button></nav>
-<section id="panel-clients"><div class="section-head"><h2>Clients</h2><button class="primary" id="add">+ Ajouter un client</button></div>
-<div id="formbox" class="card hidden"><h2 id="formtitle">Ajouter un client</h2><p class="muted">Choisis les sources autorisées. Le client ne pourra pas les changer lui-même.</p><form id="form"><div class="form-grid">
-<div><label for="name">Nom ou pseudo</label><input id="name" required maxlength="60" placeholder="Nom du client"></div>
-<div><label for="tid">Identifiant Telegram numérique</label><input id="tid" inputmode="numeric" pattern="[0-9]{1,20}" placeholder="ID Telegram"></div>
-<div><label for="code">Code d'accès (démo)</label><input id="code" maxlength="40" placeholder="Code temporaire"></div>
-<div><label for="source">Sources autorisées</label><select id="source"><option value="gael">Gaël uniquement</option><option value="amin">Amin &amp; Mathis uniquement</option><option value="both">Les deux sources</option></select></div>
-<div class="full"><label for="status">État de l'accès</label><select id="status"><option value="active">Actif</option><option value="pending">En attente</option><option value="suspended">Suspendu</option></select></div>
-</div><div class="actions"><button class="primary" type="submit">Enregistrer dans la démo</button><button type="button" id="cancel">Annuler</button></div></form></div><div id="list" class="client-list"></div></section>
-<section id="panel-admins" class="hidden"><div class="section-head"><h2>Administrateurs</h2></div>
-<div class="guard"><strong>Propriétaire protégé — Gaël</strong><br>Identifiant Telegram : <strong>8191644434</strong><br>Seul le propriétaire peut ajouter ou retirer des administrateurs. Un administrateur ne peut jamais modifier le rôle du propriétaire.</div>
-<div class="client" style="margin-top:10px"><div class="client-top"><div><div class="client-name">Gaël · Propriétaire</div><div class="client-id">8191644434</div></div><span class="state">Super Admin</span></div><span class="chip">Rôle protégé</span></div>
-<div class="client" style="margin-top:10px"><div class="client-top"><div><div class="client-name">Amin</div><div class="client-id">Administrateur à confirmer côté serveur</div></div><span class="state">Admin</span></div><span class="chip">Gestion des clients</span></div>
-<p class="muted">La gestion réelle des administrateurs sera activée après raccordement au serveur.</p></section>
-<section id="panel-security" class="hidden"><div class="section-head"><h2>Sécurité et règles</h2></div><div class="card">
-<div class="guard" style="margin-top:0"><strong>1. Propriétaire fixe</strong><br>Le serveur doit imposer l'identifiant 8191644434 et refuser toute tentative de retirer ses droits.</div>
-<div class="guard"><strong>2. Vérification serveur</strong><br>Chaque action sensible doit vérifier l'identité Telegram et le rôle côté serveur. Cacher un bouton ne suffit pas.</div>
-<div class="guard"><strong>3. Sources choisies par l'admin</strong><br>Les clients ne peuvent pas élargir leurs propres autorisations.</div>
-<div class="guard"><strong>4. Codes d'accès</strong><br>Les codes de cette maquette ne sont ni vérifiés ni stockés de façon sécurisée. La vraie version devra les valider côté serveur.</div>
-</div></section>
-<div id="toast" role="status" aria-live="polite"></div><div class="footer">Copy Trading · Administration en construction<br>Aucun ordre réel n'est exécuté depuis cette maquette.</div>
+:root{color-scheme:light dark}*{box-sizing:border-box}
+body{margin:0;padding:24px 18px;font-family:system-ui,sans-serif;background:var(--tg-theme-bg-color,#111827);color:var(--tg-theme-text-color,#f9fafb)}
+main{max-width:520px;margin:auto}.brand{font-size:13px;letter-spacing:.16em;opacity:.7;font-weight:700}
+h1{font-size:28px;margin:10px 0 8px}p{color:var(--tg-theme-hint-color,#9ca3af);line-height:1.5}
+.card{margin-top:24px;padding:20px;border-radius:18px;background:var(--tg-theme-secondary-bg-color,#1f2937)}
+.status{display:inline-block;border-radius:999px;padding:6px 10px;background:#334155;font-size:12px}
+.status.ok{background:#166534}.status.err{background:#7f1d1d}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(148,163,184,.2)}
+.row span:first-child{color:var(--tg-theme-hint-color,#9ca3af)}
+button{width:100%;border:0;border-radius:12px;padding:14px;font-size:15px;font-weight:700;margin-top:18px;color:var(--tg-theme-button-text-color,#fff);background:var(--tg-theme-button-color,#2563eb)}
+</style>
+</head>
+<body>
+<main>
+<div class="brand">COPY TRADING</div>
+<h1 id="hello">Bienvenue 👋</h1>
+<p>Ton espace de copy trading.</p>
+<section class="card">
+<span class="status" id="badge">Connexion en cours…</span>
+<h2>Mon compte</h2>
+<div id="account"><p id="message">Vérification de ton identité Telegram…</p></div>
+<button id="close">Fermer</button>
+</section>
 </main>
 <script>
-const tg=window.Telegram&&window.Telegram.WebApp;if(tg){tg.ready();tg.expand();}
-let clients=[{id:1,name:"Client démo 1",tid:"",code:"",source:"gael",status:"active"},{id:2,name:"Client démo 2",tid:"",code:"",source:"both",status:"active"}],editing=null;
-const $=id=>document.getElementById(id), sources={gael:"Gaël uniquement",amin:"Amin & Mathis uniquement",both:"Gaël + Amin & Mathis"}, statuses={active:"Actif",pending:"En attente",suspended:"Suspendu"};
-function toast(s){$("toast").textContent=s}
-function render(){ $("count").textContent=clients.length;$("active").textContent=clients.filter(c=>c.status==="active").length;const list=$("list");list.replaceChildren();if(!clients.length){const e=document.createElement("div");e.className="empty";e.textContent="Aucun client. Clique sur « Ajouter un client ».";list.append(e);return;}
-clients.forEach(c=>{const box=document.createElement("article");box.className="client";const top=document.createElement("div");top.className="client-top";const info=document.createElement("div"),name=document.createElement("div"),id=document.createElement("div"),state=document.createElement("span");name.className="client-name";name.textContent=c.name;id.className="client-id";id.textContent=c.tid?"Telegram : "+c.tid:"Telegram : non renseigné";state.className="state"+(c.status==="active"?"":" off");state.textContent=statuses[c.status];info.append(name,id);top.append(info,state);box.append(top);const chip=document.createElement("span");chip.className="chip";chip.textContent=sources[c.source];box.append(chip);const cod=document.createElement("div");cod.className="client-id";cod.textContent=c.code?"Code démo défini (masqué)":"Aucun code démo";box.append(cod);const actions=document.createElement("div");actions.className="actions";const edit=document.createElement("button");edit.textContent="Modifier";edit.onclick=()=>openForm(c.id);const toggle=document.createElement("button");toggle.textContent=c.status==="suspended"?"Réactiver":"Suspendre";toggle.className=c.status==="suspended"?"primary":"danger";toggle.onclick=()=>{c.status=c.status==="suspended"?"active":"suspended";render();toast("État modifié dans cette démo uniquement.");};const del=document.createElement("button");del.textContent="Supprimer";del.className="danger";del.onclick=()=>{if(confirm("Supprimer ce client de la démo ?")){clients=clients.filter(x=>x.id!==c.id);render();toast("Supprimé de la démo uniquement.");}};actions.append(edit,toggle,del);box.append(actions);list.append(box);});}
-function openForm(id=null){editing=id;$("form").reset();$("formtitle").textContent=id?"Modifier le client":"Ajouter un client";const c=clients.find(x=>x.id===id);if(c){$("name").value=c.name;$("tid").value=c.tid;$("code").value=c.code;$("source").value=c.source;$("status").value=c.status;}$("formbox").classList.remove("hidden");$("name").focus();}
-$("add").onclick=()=>openForm();$("cancel").onclick=()=>$("formbox").classList.add("hidden");
-$("form").onsubmit=e=>{e.preventDefault();const d={name:$("name").value.trim(),tid:$("tid").value.trim(),code:$("code").value,source:$("source").value,status:$("status").value};if(!d.name)return;if(editing)Object.assign(clients.find(c=>c.id===editing),d);else clients.push({id:Math.max(0,...clients.map(c=>c.id))+1,...d});$("formbox").classList.add("hidden");render();toast("Enregistré dans cette page seulement : pas encore sur le serveur.");};
-document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active-tab",x===b));["clients","admins","security"].forEach(t=>$("panel-"+t).classList.toggle("hidden",t!==b.dataset.tab));});render();
-</script></body></html>
+// Adresse du tunnel : à mettre à jour à chaque nouveau lancement de cloudflared
+const API_URL = "https://trains-long-drawing-possibility.trycloudflare.com";
+
+const LABELS = {
+  role: {super_admin: "Propriétaire", admin: "Administrateur", user: "Client"},
+  status: {pending: "En attente de validation", active: "Actif", revoked: "Révoqué"},
+  signal_source: {none: "Aucune source", gael: "Gaël", amin: "Amin et Mathis", both: "Les deux sources"}
+};
+
+const tg = window.Telegram && window.Telegram.WebApp;
+const badge = document.getElementById("badge");
+const account = document.getElementById("account");
+
+function setBadge(text, kind) {
+  badge.textContent = text;
+  badge.className = "status " + (kind || "");
+}
+
+function showMessage(text) {
+  account.replaceChildren();
+  const p = document.createElement("p");
+  p.textContent = text;
+  account.appendChild(p);
+}
+
+function addRow(label, value) {
+  const row = document.createElement("div");
+  row.className = "row";
+  const a = document.createElement("span");
+  const b = document.createElement("span");
+  a.textContent = label;
+  b.textContent = value;
+  row.append(a, b);
+  account.appendChild(row);
+}
+
+async function loadAccount() {
+  if (!tg || !tg.initData) {
+    setBadge("Hors Telegram", "err");
+    showMessage("Ouvre cette page depuis le bot Telegram pour voir ton compte.");
+    return;
+  }
+  try {
+    const res = await fetch(API_URL + "/me", {
+      headers: {"Authorization": "tma " + tg.initData}
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setBadge("Accès refusé", "err");
+      showMessage(data.detail || "Erreur " + res.status);
+      return;
+    }
+    setBadge("Connecté", "ok");
+    account.replaceChildren();
+    addRow("Rôle", LABELS.role[data.role] || data.role || "—");
+    addRow("Statut", LABELS.status[data.status] || data.status || "—");
+    addRow("Signaux", LABELS.signal_source[data.signal_source] || data.signal_source || "—");
+  } catch (e) {
+    setBadge("API injoignable", "err");
+    showMessage("Impossible de joindre le serveur. Le PC, l'API et le tunnel sont-ils allumés ?");
+  }
+}
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+  if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    document.getElementById("hello").textContent = "Bonjour " + tg.initDataUnsafe.user.first_name + " 👋";
+  }
+  document.getElementById("close").addEventListener("click", () => tg.close());
+} else {
+  document.getElementById("close").textContent = "Page de test";
+}
+
+loadAccount();
+</script>
+</body>
+</html>
