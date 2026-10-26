@@ -9,13 +9,17 @@
 :root{color-scheme:light dark}*{box-sizing:border-box}
 body{margin:0;padding:24px 18px;font-family:system-ui,sans-serif;background:var(--tg-theme-bg-color,#111827);color:var(--tg-theme-text-color,#f9fafb)}
 main{max-width:520px;margin:auto}.brand{font-size:13px;letter-spacing:.16em;opacity:.7;font-weight:700}
-h1{font-size:28px;margin:10px 0 8px}p{color:var(--tg-theme-hint-color,#9ca3af);line-height:1.5}
-.card{margin-top:24px;padding:20px;border-radius:18px;background:var(--tg-theme-secondary-bg-color,#1f2937)}
-.status{display:inline-block;border-radius:999px;padding:6px 10px;background:#334155;font-size:12px}
-.status.ok{background:#166534}.status.err{background:#7f1d1d}
-.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(148,163,184,.2)}
-.row span:first-child{color:var(--tg-theme-hint-color,#9ca3af)}
+h1{font-size:28px;margin:10px 0 8px}h2{margin:12px 0 6px}p{color:var(--tg-theme-hint-color,#9ca3af);line-height:1.5}
+.card{margin-top:20px;padding:20px;border-radius:18px;background:var(--tg-theme-secondary-bg-color,#1f2937)}
+.status{display:inline-block;border-radius:999px;padding:6px 10px;background:#334155;font-size:12px;color:#fff}
+.status.ok{background:#166534}.status.err{background:#7f1d1d}.status.wait{background:#92400e}
+.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(148,163,184,.2)}
+.row span:first-child{color:var(--tg-theme-hint-color,#9ca3af)}.row span:last-child{text-align:right}
+label{display:block;font-size:13px;margin:14px 0 6px;color:var(--tg-theme-hint-color,#9ca3af)}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(148,163,184,.35);background:var(--tg-theme-bg-color,#111827);color:inherit;font-size:16px}
 button{width:100%;border:0;border-radius:12px;padding:14px;font-size:15px;font-weight:700;margin-top:18px;color:var(--tg-theme-button-text-color,#fff);background:var(--tg-theme-button-color,#2563eb)}
+button.secondary{background:transparent;color:var(--tg-theme-hint-color,#9ca3af);border:1px solid rgba(148,163,184,.35)}
+button:disabled{opacity:.5}.hint{font-size:12px;margin-top:10px}.hidden{display:none}
 </style>
 </head>
 <body>
@@ -23,16 +27,39 @@ button{width:100%;border:0;border-radius:12px;padding:14px;font-size:15px;font-w
 <div class="brand">COPY TRADING</div>
 <h1 id="hello">Bienvenue 👋</h1>
 <p>Ton espace de copy trading.</p>
+
 <section class="card">
-<span class="status" id="badge">Connexion en cours…</span>
-<h2>Mon compte</h2>
-<div id="account"><p id="message">Vérification de ton identité Telegram…</p></div>
-<button id="close">Fermer</button>
+  <span class="status" id="badge">Connexion en cours…</span>
+  <h2>Mon compte</h2>
+  <div id="account"><p>Vérification de ton identité Telegram…</p></div>
 </section>
+
+<section class="card hidden" id="mt5card">
+  <span class="status" id="mt5badge">—</span>
+  <h2>Mon compte MT5</h2>
+  <div id="mt5info"></div>
+
+  <form id="mt5form" class="hidden" autocomplete="off">
+    <p>Connecte ton compte MT5 pour que les signaux soient copiés automatiquement. Tu n'as rien à installer.</p>
+    <label for="login">Numéro de compte</label>
+    <input id="login" inputmode="numeric" pattern="[0-9]+" required placeholder="ex. 12345678">
+    <label for="password">Mot de passe de trading</label>
+    <input id="password" type="password" required>
+    <label for="server">Serveur</label>
+    <input id="server" required placeholder="ex. VantageInternational-Demo">
+    <p class="hint">Le serveur est indiqué dans le mail de ton courtier ou dans MT5 (Fichier &gt; Se connecter au compte de trading). Le mot de passe est chiffré et n'est jamais affiché.</p>
+    <button type="submit" id="mt5submit">Connecter mon compte</button>
+  </form>
+
+  <button class="secondary hidden" id="mt5change">Changer de compte</button>
+  <button class="secondary hidden" id="mt5remove">Déconnecter mon compte</button>
+</section>
+
+<button id="close">Fermer</button>
 </main>
 <script>
 // Adresse du tunnel : à mettre à jour à chaque nouveau lancement de cloudflared
-const API_URL = "https://trains-long-drawing-possibility.trycloudflare.com";
+const API_URL = "COLLE_ICI_L_ADRESSE_DU_TUNNEL";
 
 const LABELS = {
   role: {super_admin: "Propriétaire", admin: "Administrateur", user: "Client"},
@@ -41,68 +68,160 @@ const LABELS = {
 };
 
 const tg = window.Telegram && window.Telegram.WebApp;
-const badge = document.getElementById("badge");
-const account = document.getElementById("account");
+const $ = id => document.getElementById(id);
+let me = null;
+let pollTimer = null;
 
-function setBadge(text, kind) {
-  badge.textContent = text;
-  badge.className = "status " + (kind || "");
+function setBadge(el, text, kind) { el.textContent = text; el.className = "status " + (kind || ""); }
+
+function rows(container, list) {
+  container.replaceChildren();
+  for (const [label, value] of list) {
+    const row = document.createElement("div");
+    row.className = "row";
+    const a = document.createElement("span");
+    const b = document.createElement("span");
+    a.textContent = label;
+    b.textContent = value;
+    row.append(a, b);
+    container.appendChild(row);
+  }
 }
 
-function showMessage(text) {
-  account.replaceChildren();
+function message(container, text) {
+  container.replaceChildren();
   const p = document.createElement("p");
   p.textContent = text;
-  account.appendChild(p);
+  container.appendChild(p);
 }
 
-function addRow(label, value) {
-  const row = document.createElement("div");
-  row.className = "row";
-  const a = document.createElement("span");
-  const b = document.createElement("span");
-  a.textContent = label;
-  b.textContent = value;
-  row.append(a, b);
-  account.appendChild(row);
+async function api(path, options = {}) {
+  if (API_URL.startsWith("COLLE")) throw new Error("Adresse de l'API non configurée");
+  const res = await fetch(API_URL + path, {
+    ...options,
+    headers: {"Authorization": "tma " + tg.initData, ...(options.body ? {"Content-Type": "application/json"} : {})}
+  });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok) {
+    const detail = Array.isArray(data.detail) ? "Champs invalides" : (data.detail || "Erreur " + res.status);
+    throw Object.assign(new Error(detail), {status: res.status});
+  }
+  return data;
 }
 
 async function loadAccount() {
+  const badge = $("badge"), box = $("account");
   if (!tg || !tg.initData) {
-    setBadge("Hors Telegram", "err");
-    showMessage("Ouvre cette page depuis le bot Telegram pour voir ton compte.");
+    setBadge(badge, "Hors Telegram", "err");
+    message(box, "Ouvre cette page depuis le bouton Menu du bot Telegram.");
     return;
   }
   try {
-    const res = await fetch(API_URL + "/me", {
-      headers: {"Authorization": "tma " + tg.initData}
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setBadge("Accès refusé", "err");
-      showMessage(data.detail || "Erreur " + res.status);
+    me = await api("/me");
+  } catch (e) {
+    setBadge(badge, e.status ? "Accès refusé" : "API injoignable", "err");
+    message(box, e.status ? e.message : "Impossible de joindre le serveur. Le PC, l'API et le tunnel sont-ils allumés ?");
+    return;
+  }
+  setBadge(badge, "Connecté", "ok");
+  rows(box, [
+    ["Rôle", LABELS.role[me.role] || me.role || "—"],
+    ["Statut", LABELS.status[me.status] || me.status || "—"],
+    ["Signaux", LABELS.signal_source[me.signal_source] || me.signal_source || "—"]
+  ]);
+  $("mt5card").classList.remove("hidden");
+  loadMt5();
+}
+
+function showForm(show) {
+  $("mt5form").classList.toggle("hidden", !show);
+  $("mt5change").classList.toggle("hidden", show);
+  $("mt5remove").classList.toggle("hidden", show);
+}
+
+function renderMt5(acc) {
+  clearTimeout(pollTimer);
+  const badge = $("mt5badge"), info = $("mt5info");
+  if (!acc) {
+    setBadge(badge, "Non connecté", "");
+    info.replaceChildren();
+    if (me.status !== "active") {
+      message(info, "Ton accès doit d'abord être validé par un administrateur avant de connecter un compte MT5.");
+      $("mt5form").classList.add("hidden");
+      $("mt5change").classList.add("hidden");
+      $("mt5remove").classList.add("hidden");
       return;
     }
-    setBadge("Connecté", "ok");
-    account.replaceChildren();
-    addRow("Rôle", LABELS.role[data.role] || data.role || "—");
-    addRow("Statut", LABELS.status[data.status] || data.status || "—");
-    addRow("Signaux", LABELS.signal_source[data.signal_source] || data.signal_source || "—");
+    showForm(true);
+    return;
+  }
+  showForm(false);
+  const list = [["Compte", String(acc.login)], ["Serveur", acc.server]];
+  if (acc.balance !== null && acc.balance !== undefined) {
+    list.push(["Solde", acc.balance.toLocaleString("fr-FR", {maximumFractionDigits: 2}) + " " + (acc.currency || "")]);
+  }
+  list.push(["Lot par TP", String(acc.lot_per_tp)]);
+  if (acc.message) list.push(["État", acc.message]);
+  rows(info, list);
+  if (acc.status === "connected") setBadge(badge, "Compte connecté", "ok");
+  else if (acc.status === "error") setBadge(badge, "Problème de connexion", "err");
+  else setBadge(badge, "Connexion en cours…", "wait");
+  // Rafraîchit l'état : souvent au début, puis toutes les 30 s
+  pollTimer = setTimeout(loadMt5, acc.status === "pending" ? 4000 : 30000);
+}
+
+async function loadMt5() {
+  try {
+    const data = await api("/mt5");
+    renderMt5(data.account);
   } catch (e) {
-    setBadge("API injoignable", "err");
-    showMessage("Impossible de joindre le serveur. Le PC, l'API et le tunnel sont-ils allumés ?");
+    setBadge($("mt5badge"), "Erreur", "err");
+    message($("mt5info"), e.message);
   }
 }
+
+$("mt5form").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const btn = $("mt5submit");
+  btn.disabled = true;
+  btn.textContent = "Envoi…";
+  try {
+    const data = await api("/mt5", {method: "POST", body: JSON.stringify({
+      login: Number($("login").value.trim()),
+      password: $("password").value,
+      server: $("server").value.trim()
+    })});
+    $("password").value = "";
+    renderMt5(data.account);
+  } catch (e) {
+    message($("mt5info"), e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Connecter mon compte";
+  }
+});
+
+$("mt5change").addEventListener("click", () => { clearTimeout(pollTimer); showForm(true); });
+
+$("mt5remove").addEventListener("click", async () => {
+  const doRemove = async () => {
+    try { await api("/mt5", {method: "DELETE"}); renderMt5(null); }
+    catch (e) { message($("mt5info"), e.message); }
+  };
+  if (tg && tg.showConfirm) tg.showConfirm("Déconnecter ce compte MT5 ? La copie des signaux s'arrêtera.", ok => { if (ok) doRemove(); });
+  else doRemove();
+});
 
 if (tg) {
   tg.ready();
   tg.expand();
   if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    document.getElementById("hello").textContent = "Bonjour " + tg.initDataUnsafe.user.first_name + " 👋";
+    $("hello").textContent = "Bonjour " + tg.initDataUnsafe.user.first_name + " 👋";
   }
-  document.getElementById("close").addEventListener("click", () => tg.close());
+  $("close").addEventListener("click", () => tg.close());
 } else {
-  document.getElementById("close").textContent = "Page de test";
+  $("close").textContent = "Page de test";
 }
 
 loadAccount();
