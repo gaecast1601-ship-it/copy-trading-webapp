@@ -6,7 +6,7 @@
 <title>Copy Trading</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{color-scheme:light dark;--hint:var(--tg-theme-hint-color,#9ca3af);--card:var(--tg-theme-secondary-bg-color,#1f2937);--bg:var(--tg-theme-bg-color,#111827);--line:rgba(148,163,184,.22)}
+:root{color-scheme:light dark;--hint:var(--tg-theme-hint-color,#9ca3af);--card:var(--tg-theme-secondary-bg-color,#1f2937);--bg:var(--tg-theme-bg-color,#111827);--line:rgba(148,163,184,.22);--btn:var(--tg-theme-button-color,#2563eb)}
 *{box-sizing:border-box}
 body{margin:0;padding:20px 16px 32px;font-family:system-ui,sans-serif;background:var(--bg);color:var(--tg-theme-text-color,#f9fafb)}
 main{max-width:560px;margin:auto}.brand{font-size:13px;letter-spacing:.16em;opacity:.7;font-weight:700}
@@ -19,20 +19,29 @@ p{color:var(--hint);line-height:1.5;margin:6px 0}
 .row span:first-child{color:var(--hint)}.row span:last-child{text-align:right;word-break:break-word}
 label{display:block;font-size:13px;margin:12px 0 6px;color:var(--hint)}
 input,select{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:inherit;font-size:16px}
-button{width:100%;border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;margin-top:14px;color:var(--tg-theme-button-text-color,#fff);background:var(--tg-theme-button-color,#2563eb)}
+button{width:100%;border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;margin-top:14px;color:var(--tg-theme-button-text-color,#fff);background:var(--btn)}
 button.secondary{background:transparent;color:var(--hint);border:1px solid var(--line)}
 button.danger{background:#b91c1c;color:#fff}button.small{width:auto;padding:8px 12px;font-size:13px;margin:0}
 button:disabled{opacity:.5}.hint{font-size:12px}.hidden{display:none!important}
 .tabs{display:flex;gap:8px;margin-top:16px}.tabs button{margin:0;background:var(--card);color:var(--hint)}
-.tabs button.active{background:var(--tg-theme-button-color,#2563eb);color:#fff}
-.user{padding:14px 0;border-bottom:1px solid var(--line)}.user:last-child{border-bottom:0}
-.user-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.tabs button.active{background:var(--btn);color:#fff}
+.item{padding:14px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.grid label{margin:0 0 4px}
 .toolbar{display:flex;gap:8px;align-items:center;margin-top:10px}.toolbar input{flex:1}
 .toast{position:fixed;left:16px;right:16px;bottom:16px;max-width:560px;margin:auto;padding:12px 14px;border-radius:12px;background:#111;color:#fff;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:10}
 .switch{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .muted{color:var(--hint);font-size:13px}
+.code{font-size:30px;font-weight:800;letter-spacing:.18em;text-align:center;padding:14px;border-radius:12px;background:var(--bg);margin-top:8px;font-family:ui-monospace,monospace}
+.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.check{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:13px;cursor:pointer;margin:0;color:inherit}
+.check input{width:auto;margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px;text-align:center}.stat b{display:block;font-size:15px}.stat span{font-size:11px;color:var(--hint)}
+.pos{color:#22c55e}.neg{color:#ef4444}
+.trade{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line)}
+.panel{margin-top:10px;padding:10px;border-radius:12px;background:var(--bg)}
 </style>
 </head>
 <body>
@@ -45,12 +54,21 @@ button:disabled{opacity:.5}.hint{font-size:12px}.hidden{display:none!important}
   <button data-tab="admin">Administration</button>
 </div>
 
-<!-- ============ ONGLET MON COMPTE ============ -->
+<!-- ============ MON COMPTE ============ -->
 <div id="tab-home">
   <section class="card">
     <span class="status" id="badge">Connexion en cours…</span>
     <h2>Mon compte</h2>
     <div id="account"><p>Vérification de ton identité Telegram…</p></div>
+  </section>
+
+  <section class="card hidden" id="codecard">
+    <h2>Code de parrainage</h2>
+    <p>Entre le code que t'a donné ton administrateur pour être rattaché à lui.</p>
+    <form id="codeform" autocomplete="off">
+      <input id="codeinput" required placeholder="ex. K7Q2MX" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="20">
+      <button type="submit">Valider le code</button>
+    </form>
   </section>
 
   <section class="card hidden" id="mt5card">
@@ -71,10 +89,25 @@ button:disabled{opacity:.5}.hint{font-size:12px}.hidden{display:none!important}
     <button class="secondary hidden" id="mt5change">Changer de compte</button>
     <button class="secondary hidden" id="mt5remove">Déconnecter mon compte</button>
   </section>
+
+  <section class="card hidden" id="mytrades">
+    <h2>Mes résultats</h2>
+    <div id="mytradesbody"></div>
+  </section>
 </div>
 
-<!-- ============ ONGLET ADMINISTRATION ============ -->
+<!-- ============ ADMINISTRATION ============ -->
 <div id="tab-admin" class="hidden">
+  <section class="card">
+    <h2>Mon code de parrainage</h2>
+    <p>Donne ce code à tes clients : en l'entrant dans l'application, ils sont rattachés à toi. Toi seul le vois.</p>
+    <div class="code" id="mycode">—</div>
+    <div class="grid">
+      <button class="secondary" id="copycode" style="margin:0">Copier</button>
+      <button id="sharecode" style="margin:0">Partager</button>
+    </div>
+  </section>
+
   <section class="card hidden" id="copycard">
     <h2>Copie des trades</h2>
     <div id="services"></div>
@@ -88,14 +121,18 @@ button:disabled{opacity:.5}.hint{font-size:12px}.hidden{display:none!important}
     </div>
   </section>
 
-  <section class="card hidden" id="channelcard">
-    <div class="user-head"><h2>Canaux de signaux</h2><button class="small secondary" id="refreshDialogs">Actualiser</button></div>
-    <p class="hint">Choisis le canal Telegram écouté pour chaque source. Le changement s'applique en quelques secondes, sans relancer le PC.</p>
-    <div id="channels"></div>
+  <section class="card hidden" id="sourcecard">
+    <div class="head"><h2>Sources de signaux</h2><button class="small secondary" id="refreshDialogs">Actualiser les canaux</button></div>
+    <p class="hint">Une source = un nom, un canal Telegram écouté, et les administrateurs qui peuvent la donner à leurs clients.</p>
+    <div id="sources"></div>
+    <div class="toolbar">
+      <input id="newsource" placeholder="Nom de la nouvelle source" maxlength="60">
+      <button class="small" id="addsource">Ajouter</button>
+    </div>
   </section>
 
   <section class="card">
-    <h2>Utilisateurs</h2>
+    <h2 id="usersTitle">Mes clients</h2>
     <div id="userStats" class="muted"></div>
     <div class="toolbar">
       <input id="search" placeholder="Rechercher un nom, @pseudo ou ID">
@@ -104,7 +141,6 @@ button:disabled{opacity:.5}.hint{font-size:12px}.hidden{display:none!important}
         <option value="pending">En attente</option>
         <option value="active">Actifs</option>
         <option value="revoked">Révoqués</option>
-        <option value="admins">Admins</option>
       </select>
     </div>
     <div id="users"><p>Chargement…</p></div>
@@ -116,18 +152,19 @@ button:disabled{opacity:.5}.hint{font-size:12px}.hidden{display:none!important}
 <div class="toast hidden" id="toast"></div>
 <script>
 // Adresse du tunnel : à mettre à jour à chaque nouveau lancement de cloudflared
-const API_URL = "https://accent-ports-electron-networking.trycloudflare.com";
+const API_URL = "COLLE_ICI_L_ADRESSE_DU_TUNNEL";
+const BOT_LINK = "https://t.me/AscendCopyBot";
 
 const LABELS = {
   role: {super_admin: "Propriétaire", admin: "Administrateur", user: "Client"},
-  status: {pending: "En attente", active: "Actif", revoked: "Révoqué"},
-  signal_source: {none: "Aucune source", gael: "Gaël", amin: "Amin et Mathis", both: "Les deux sources"}
+  status: {pending: "En attente", active: "Actif", revoked: "Révoqué"}
 };
 const STATUS_CLASS = {pending: "wait", active: "ok", revoked: "err"};
 
 const tg = window.Telegram && window.Telegram.WebApp;
 const $ = id => document.getElementById(id);
-let me = null, admin = null, pollTimer = null, adminTimer = null;
+let me = null, admin = null, sourcesData = null, pollTimer = null, adminTimer = null;
+const openPanels = new Set();
 
 // ---------------------------------------------------------------- outils
 function el(tag, attrs = {}, ...children) {
@@ -136,12 +173,13 @@ function el(tag, attrs = {}, ...children) {
     if (k === "class") e.className = v;
     else if (k === "text") e.textContent = v;
     else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (k === "checked" || k === "disabled") e[k] = !!v;
     else if (v !== undefined && v !== null && v !== false) e.setAttribute(k, v === true ? "" : v);
   }
-  for (const c of children) if (c) e.append(c);
+  for (const c of children) if (c !== null && c !== undefined && c !== false) e.append(c);
   return e;
 }
-function badge(text, cls) { return el("span", {class: "status " + (cls || ""), text}); }
+const badge = (text, cls) => el("span", {class: "status " + (cls || ""), text});
 function setBadge(node, text, cls) { node.textContent = text; node.className = "status " + (cls || ""); }
 function rows(container, list) {
   container.replaceChildren(...list.map(([a, b]) => el("div", {class: "row"}, el("span", {text: a}), el("span", {text: b}))));
@@ -159,7 +197,11 @@ function ago(ts) {
   if (s < 86400) return "il y a " + Math.round(s / 3600) + " h";
   return "il y a " + Math.round(s / 86400) + " j";
 }
-function money(v, cur) { return v === null || v === undefined ? "—" : v.toLocaleString("fr-FR", {maximumFractionDigits: 2}) + " " + (cur || ""); }
+const fmt = v => (v === null || v === undefined) ? "—" : Number(v).toLocaleString("fr-FR", {maximumFractionDigits: 2});
+const money = (v, cur) => (v === null || v === undefined) ? "—" : fmt(v) + " " + (cur || "");
+const signed = (v, cur) => (v === null || v === undefined) ? "—" : (v > 0 ? "+" : "") + fmt(v) + " " + (cur || "");
+const pnlClass = v => v > 0 ? "pos" : v < 0 ? "neg" : "";
+const date = ts => new Date(ts * 1000).toLocaleString("fr-FR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"});
 function confirmBox(text) {
   return new Promise(resolve => {
     if (tg && tg.showConfirm) tg.showConfirm(text, ok => resolve(ok));
@@ -183,6 +225,44 @@ async function api(path, options = {}) {
 }
 const post = (path, body) => api(path, {method: "POST", body: JSON.stringify(body || {})});
 
+// ---------------------------------------------------------------- statistiques (partagé client / admin)
+function statsBlock(st) {
+  if (!st) return el("p", {class: "hint", text: "Pas encore de données de trading (elles arrivent une minute après la connexion du compte MT5)."});
+  const c = st.currency;
+  return el("div", {},
+    el("div", {class: "stats"},
+      el("div", {class: "stat"}, el("b", {text: money(st.balance, c)}), el("span", {text: "Solde"})),
+      el("div", {class: "stat"}, el("b", {class: pnlClass(st.floating), text: signed(st.floating, c)}), el("span", {text: "En cours (" + (st.open_count ?? (st.open || []).length) + ")"})),
+      el("div", {class: "stat"}, el("b", {class: pnlClass(st.pnl_today), text: signed(st.pnl_today, c)}), el("span", {text: "Aujourd'hui"})),
+      el("div", {class: "stat"}, el("b", {class: pnlClass(st.pnl_7d), text: signed(st.pnl_7d, c)}), el("span", {text: "7 jours"})),
+      el("div", {class: "stat"}, el("b", {class: pnlClass(st.pnl_30d), text: signed(st.pnl_30d, c)}), el("span", {text: "30 jours"})),
+      el("div", {class: "stat"}, el("b", {text: st.win_rate_30d === null || st.win_rate_30d === undefined ? "—" : st.win_rate_30d + " %"}), el("span", {text: "Réussite (" + st.trades_30d + " trades)"}))
+    ),
+    el("p", {class: "hint", text: "Mis à jour " + ago(st.updated_at) + (st.simulation ? " · mode simulation" : "")})
+  );
+}
+
+function tradesList(st) {
+  if (!st) return el("p", {class: "hint", text: "Aucune donnée."});
+  const c = st.currency;
+  const box = el("div", {});
+  box.append(el("h3", {text: "Positions ouvertes"}));
+  if (!(st.open || []).length) box.append(el("p", {class: "hint", text: "Aucune."}));
+  for (const p of st.open || []) {
+    box.append(el("div", {class: "trade"},
+      el("span", {text: `${p.side === "buy" ? "ACHAT" : "VENTE"} ${p.volume} ${p.symbol} @ ${p.price_open}` + (p.tp ? ` · TP ${p.tp}` : "") + (p.sl ? ` · SL ${p.sl}` : "")}),
+      el("b", {class: pnlClass(p.profit), text: signed(p.profit, c)})));
+  }
+  box.append(el("h3", {text: "Trades fermés (30 jours)", style: "margin-top:12px"}));
+  if (!(st.closed || []).length) box.append(el("p", {class: "hint", text: "Aucun."}));
+  for (const t of st.closed || []) {
+    box.append(el("div", {class: "trade"},
+      el("span", {text: `${date(t.time)} · ${t.side === "buy" ? "ACHAT" : "VENTE"} ${t.volume} ${t.symbol}`}),
+      el("b", {class: pnlClass(t.profit), text: signed(t.profit, c)})));
+  }
+  return box;
+}
+
 // ---------------------------------------------------------------- onglets
 document.querySelectorAll("#tabs button").forEach(b => b.addEventListener("click", () => {
   document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("active", x === b));
@@ -199,23 +279,37 @@ async function loadAccount() {
     message(box, "Ouvre cette page depuis le bouton Menu du bot Telegram.");
     return;
   }
-  try {
-    me = await api("/me");
-  } catch (e) {
+  try { me = await api("/me"); }
+  catch (e) {
     setBadge($("badge"), e.status ? "Accès refusé" : "API injoignable", "err");
     message(box, e.status ? e.message : "Impossible de joindre le serveur. Le PC, l'API et le tunnel sont-ils allumés ?");
     return;
   }
-  setBadge($("badge"), "Connecté", "ok");
-  rows(box, [
-    ["Rôle", LABELS.role[me.role] || me.role],
-    ["Statut", LABELS.status[me.status] || me.status],
-    ["Signaux", LABELS.signal_source[me.signal_source] || me.signal_source]
-  ]);
+  renderMe();
   $("mt5card").classList.remove("hidden");
-  if ((me.role === "admin" || me.role === "super_admin") && me.status === "active") $("tabs").classList.remove("hidden");
   loadMt5();
+  loadMyTrades();
 }
+
+function renderMe() {
+  setBadge($("badge"), "Connecté", "ok");
+  const isAdmin = me.role === "admin" || me.role === "super_admin";
+  const list = [["Rôle", LABELS.role[me.role] || me.role], ["Statut", LABELS.status[me.status] || me.status]];
+  if (!isAdmin) list.push(["Administrateur", me.referrer ? me.referrer.name : "aucun (entre ton code)"]);
+  list.push(["Signaux suivis", me.sources.length ? me.sources.map(s => s.name).join(", ") : "aucun"]);
+  rows($("account"), list);
+  $("codecard").classList.toggle("hidden", isAdmin || !!me.referrer);
+  if (isAdmin && me.status === "active") $("tabs").classList.remove("hidden");
+}
+
+$("codeform").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  try {
+    me = await post("/referral", {code: $("codeinput").value});
+    renderMe();
+    toast("Code validé : tu es rattaché à " + me.referrer.name + ". Il doit maintenant activer ton accès.");
+  } catch (e) { toast(e.message); }
+});
 
 function showForm(show) {
   $("mt5form").classList.toggle("hidden", !show);
@@ -230,7 +324,9 @@ function renderMt5(acc) {
     setBadge($("mt5badge"), "Non connecté", "");
     info.replaceChildren();
     if (me.status !== "active") {
-      message(info, "Ton accès doit d'abord être validé par un administrateur avant de connecter un compte MT5.");
+      message(info, me.referrer || me.role !== "user"
+        ? "Ton accès doit d'abord être activé par ton administrateur avant de connecter un compte MT5."
+        : "Entre d'abord le code de parrainage de ton administrateur.");
       ["mt5form", "mt5change", "mt5remove"].forEach(id => $(id).classList.add("hidden"));
       return;
     }
@@ -254,16 +350,21 @@ async function loadMt5() {
   catch (e) { setBadge($("mt5badge"), "Erreur", "err"); message($("mt5info"), e.message); }
 }
 
+async function loadMyTrades() {
+  try {
+    const {stats} = await api("/my/trades");
+    if (!stats) return;
+    $("mytrades").classList.remove("hidden");
+    $("mytradesbody").replaceChildren(statsBlock(stats), el("div", {class: "panel"}, tradesList(stats)));
+  } catch (e) {}
+}
+
 $("mt5form").addEventListener("submit", async ev => {
   ev.preventDefault();
   const btn = $("mt5submit");
   btn.disabled = true; btn.textContent = "Envoi…";
   try {
-    const data = await post("/mt5", {
-      login: Number($("login").value.trim()),
-      password: $("password").value,
-      server: $("server").value.trim()
-    });
+    const data = await post("/mt5", {login: Number($("login").value.trim()), password: $("password").value, server: $("server").value.trim()});
     $("password").value = "";
     renderMt5(data.account);
   } catch (e) { toast(e.message); }
@@ -278,17 +379,29 @@ $("mt5remove").addEventListener("click", async () => {
 // ---------------------------------------------------------------- administration
 async function loadAdmin() {
   clearTimeout(adminTimer);
-  try {
-    admin = await api("/admin/overview");
-  } catch (e) { message($("users"), e.message); return; }
-  renderCopy(admin.copy);
+  try { admin = await api("/admin/overview"); }
+  catch (e) { message($("users"), e.message); return; }
+  $("mycode").textContent = admin.me.code;
+  $("usersTitle").textContent = admin.me.is_owner ? "Utilisateurs" : "Mes clients";
+  if (admin.me.is_owner && !$("filter").querySelector('[value="noadmin"]')) {
+    $("filter").append(el("option", {value: "admins", text: "Admins"}), el("option", {value: "noadmin", text: "Sans admin"}));
+  }
+  if (admin.me.is_owner) { renderCopy(admin.copy); loadSources(); }
   renderUsers();
-  if (admin.me.is_owner) loadChannels();
   adminTimer = setTimeout(() => { if (!$("tab-admin").classList.contains("hidden")) loadAdmin(); }, 30000);
 }
 
+$("copycode").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(admin.me.code); toast("Code copié"); }
+  catch (e) { toast("Code : " + admin.me.code); }
+});
+$("sharecode").addEventListener("click", () => {
+  const text = `Rejoins Copy Trading : ouvre ${BOT_LINK}, envoie /start, puis ouvre l'application et entre mon code de parrainage : ${admin.me.code}`;
+  const url = "https://t.me/share/url?url=" + encodeURIComponent(BOT_LINK) + "&text=" + encodeURIComponent(text);
+  if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url);
+});
+
 function renderCopy(c) {
-  if (!admin.me.is_owner) return;
   $("copycard").classList.remove("hidden");
   rows($("services"), [
     ["Lecture des canaux", c.listener_alive ? "✅ en marche" : "❌ arrêtée"],
@@ -301,7 +414,6 @@ function renderCopy(c) {
   $("stopBtn").textContent = c.stop ? "Reprendre" : "Tout bloquer";
   $("stopBtn").className = "small " + (c.stop ? "" : "danger");
 }
-
 $("modeBtn").addEventListener("click", async () => {
   const toReal = admin.copy.dry_run;
   if (toReal && !await confirmBox("Passer en mode RÉEL ? Les signaux ouvriront de vraies positions sur les comptes de tous les clients connectés.")) return;
@@ -314,124 +426,200 @@ $("stopBtn").addEventListener("click", async () => {
   catch (e) { toast(e.message); }
 });
 
-async function loadChannels() {
-  $("channelcard").classList.remove("hidden");
-  try { renderChannels(await api("/admin/channels")); }
-  catch (e) { message($("channels"), e.message); }
+// ---------------------------------------------------------------- sources (propriétaire)
+async function loadSources() {
+  $("sourcecard").classList.remove("hidden");
+  try { sourcesData = await api("/admin/sources"); renderSources(); }
+  catch (e) { message($("sources"), e.message); }
 }
 
-function renderChannels(data) {
-  const box = $("channels");
+async function updateSource(id, body, okText) {
+  try { sourcesData = await post("/admin/sources/" + id, body); renderSources(); toast(okText); loadAdmin(); }
+  catch (e) { toast(e.message); renderSources(); }
+}
+
+function renderSources() {
+  const box = $("sources");
   box.replaceChildren();
-  if (!data.listener_alive) box.append(el("p", {text: "⚠️ La lecture des canaux est arrêtée sur le PC (copier.run_all)."}));
-  if (!data.dialogs.length) {
-    box.append(el("p", {text: "Liste des canaux pas encore reçue. Appuie sur « Actualiser » puis patiente 10 secondes."}));
-  }
-  for (const [source, info] of Object.entries(data.sources)) {
+  const d = sourcesData;
+  if (!d.listener_alive) box.append(el("p", {text: "⚠️ La lecture des canaux est arrêtée sur le PC (copier.run_all)."}));
+  if (!d.dialogs.length) box.append(el("p", {class: "hint", text: "Liste de tes canaux pas encore reçue : appuie sur « Actualiser les canaux » puis patiente 10 secondes."}));
+  if (!d.sources.length) box.append(el("p", {text: "Aucune source pour l'instant : ajoute-en une ci-dessous."}));
+  for (const s of d.sources) {
+    const name = el("input", {value: s.name, maxlength: "60"});
     const select = el("select", {}, el("option", {value: "", text: "— Aucun canal —"}));
     const known = new Set();
-    for (const d of data.dialogs) {
-      known.add(String(d.id));
-      select.append(el("option", {value: d.id, text: d.title + (d.username ? " (@" + d.username + ")" : "") + (d.kind === "groupe" ? " · groupe" : "")}));
+    for (const dl of d.dialogs) {
+      known.add(String(dl.id));
+      select.append(el("option", {value: dl.id, text: dl.title + (dl.username ? " (@" + dl.username + ")" : "") + (dl.kind === "groupe" ? " · groupe" : "")}));
     }
-    if (info.chat && !known.has(String(info.chat))) select.append(el("option", {value: info.chat, text: info.title || info.chat}));
-    select.value = info.chat || "";
-    select.addEventListener("change", async () => {
+    if (s.chat && !known.has(String(s.chat))) select.append(el("option", {value: s.chat, text: s.chat_title || s.chat}));
+    select.value = s.chat || "";
+    select.addEventListener("change", () => {
       const opt = select.options[select.selectedIndex];
-      try {
-        renderChannels(await post("/admin/channels/" + source, {chat: select.value || null, title: select.value ? opt.textContent : null}));
-        toast(select.value ? "Canal enregistré pour " + info.label : "Plus aucun canal pour " + info.label);
-      } catch (e) { toast(e.message); select.value = info.chat || ""; }
+      updateSource(s.id, select.value ? {chat: select.value, chat_title: opt.textContent} : {clear_chat: true},
+                   select.value ? "Canal enregistré" : "Canal retiré");
     });
-    box.append(el("div", {class: "user"},
-      el("h3", {text: info.label}),
-      el("label", {text: "Canal écouté"}), select,
-      el("p", {class: "hint", text: "Dernier signal reçu : " + ago(info.last_signal_at) + (info.last_signal_text ? " — « " + info.last_signal_text.replace(/\s+/g, " ") + " »" : "")})
+    const checks = el("div", {class: "checks"});
+    for (const a of admin.admins.filter(a => a.role === "admin")) {
+      const cb = el("input", {type: "checkbox", checked: s.admin_ids.includes(a.telegram_id)});
+      cb.addEventListener("change", () => {
+        const ids = [...checks.querySelectorAll("input")].map((x, i) => x.checked ? x.dataset.id : null).filter(Boolean).map(Number);
+        updateSource(s.id, {admin_ids: ids}, "Administrateurs mis à jour");
+      });
+      cb.dataset.id = a.telegram_id;
+      checks.append(el("label", {class: "check"}, cb, a.name));
+    }
+    if (!checks.children.length) checks.append(el("span", {class: "hint", text: "Aucun administrateur pour l'instant (nomme-en un dans la liste des utilisateurs)."}));
+    const ls = s.last_signal;
+    box.append(el("div", {class: "item"},
+      el("div", {class: "head"},
+        el("div", {style: "flex:1"}, el("label", {text: "Nom de la source", style: "margin-top:0"}), name),
+        badge(s.chat ? "écoutée" : "sans canal", s.chat ? "ok" : "wait")),
+      el("button", {class: "small secondary", style: "margin-top:8px", text: "Renommer", onclick: () => updateSource(s.id, {name: name.value}, "Source renommée")}),
+      el("label", {text: "Canal Telegram écouté"}), select,
+      el("label", {text: "Administrateurs qui peuvent la donner à leurs clients"}), checks,
+      el("p", {class: "hint", text: `${s.clients} client(s) la suivent · dernier signal : ${ls ? ago(ls.at) + " — « " + ls.text.replace(/\s+/g, " ") + " »" : "jamais"}`}),
+      el("button", {class: "small danger", text: "Supprimer cette source", onclick: async () => {
+        if (!await confirmBox(`Supprimer la source « ${s.name} » ? Ses ${s.clients} client(s) ne recevront plus ses signaux.`)) return;
+        try { sourcesData = await api("/admin/sources/" + s.id, {method: "DELETE"}); renderSources(); toast("Source supprimée"); loadAdmin(); }
+        catch (e) { toast(e.message); }
+      }})
     ));
   }
 }
 
+$("addsource").addEventListener("click", async () => {
+  const name = $("newsource").value.trim();
+  if (!name) return toast("Donne un nom à la source");
+  try { sourcesData = await post("/admin/sources", {name}); $("newsource").value = ""; renderSources(); toast("Source ajoutée : choisis maintenant son canal"); loadAdmin(); }
+  catch (e) { toast(e.message); }
+});
 $("refreshDialogs").addEventListener("click", async () => {
-  try { await post("/admin/channels/refresh"); toast("Actualisation demandée…"); setTimeout(loadChannels, 8000); }
+  try { await post("/admin/sources/refresh-channels"); toast("Actualisation demandée…"); setTimeout(loadSources, 8000); }
   catch (e) { toast(e.message); }
 });
 
+// ---------------------------------------------------------------- utilisateurs
 function renderUsers() {
   const q = $("search").value.trim().toLowerCase();
   const f = $("filter").value;
   const all = admin.users;
   const counts = {pending: 0, active: 0, mt5: 0};
   all.forEach(u => { if (u.status === "pending") counts.pending++; if (u.status === "active") counts.active++; if (u.mt5 && u.mt5.status === "connected") counts.mt5++; });
-  $("userStats").textContent = `${all.length} utilisateur(s) · ${counts.active} actif(s) · ${counts.pending} en attente · ${counts.mt5} compte(s) MT5 connecté(s)`;
+  $("userStats").textContent = `${all.length} personne(s) · ${counts.active} active(s) · ${counts.pending} en attente · ${counts.mt5} compte(s) MT5 connecté(s)`;
   const list = all.filter(u => {
     if (f === "admins" && !(u.role === "admin" || u.role === "super_admin")) return false;
+    if (f === "noadmin" && (u.referrer || u.role !== "user")) return false;
     if (["pending", "active", "revoked"].includes(f) && u.status !== f) return false;
     if (!q) return true;
     return [u.full_name, u.username, String(u.telegram_id)].some(x => x && String(x).toLowerCase().includes(q));
   });
   const box = $("users");
   box.replaceChildren();
-  if (!list.length) { box.append(el("p", {text: "Aucun utilisateur."})); return; }
+  if (!list.length) {
+    box.append(el("p", {text: admin.me.is_owner ? "Aucun utilisateur." : "Aucun client pour l'instant : partage ton code de parrainage."}));
+    return;
+  }
   for (const u of list) box.append(userCard(u));
 }
 $("search").addEventListener("input", () => admin && renderUsers());
 $("filter").addEventListener("change", () => admin && renderUsers());
 
 function userCard(u) {
+  const owner = admin.me.is_owner;
   const isMe = u.telegram_id === admin.me.telegram_id;
   const isOwnerRow = u.role === "super_admin";
-  const owner = admin.me.is_owner;
   const mt5 = u.mt5;
   const mt5Text = !mt5 ? "MT5 non connecté"
-    : mt5.status === "connected" ? `MT5 ${mt5.login} · ${money(mt5.balance, mt5.currency)}`
+    : mt5.status === "connected" ? `MT5 ${mt5.login}`
     : mt5.status === "error" ? `MT5 ${mt5.login} · ${mt5.message || "erreur"}` : `MT5 ${mt5.login} · connexion…`;
 
-  const card = el("div", {class: "user"},
-    el("div", {class: "user-head"},
+  const card = el("div", {class: "item"},
+    el("div", {class: "head"},
       el("div", {},
         el("h3", {text: (u.full_name || "Sans nom") + (isMe ? " (toi)" : "")}),
-        el("div", {class: "muted", text: (u.username ? "@" + u.username + " · " : "") + "ID " + u.telegram_id})
-      ),
-      badge(LABELS.status[u.status] || u.status, STATUS_CLASS[u.status])
-    ),
+        el("div", {class: "muted", text: (u.username ? "@" + u.username + " · " : "") + "ID " + u.telegram_id})),
+      badge(LABELS.status[u.status] || u.status, STATUS_CLASS[u.status])),
     el("div", {class: "badges"},
       badge(LABELS.role[u.role] || u.role, u.role === "user" ? "" : "blue"),
-      badge(mt5Text, !mt5 ? "" : mt5.status === "connected" ? "ok" : mt5.status === "error" ? "err" : "wait")
-    )
+      owner && u.role === "user" ? badge(u.referrer ? "Admin : " + u.referrer.name : "Sans admin", u.referrer ? "" : "wait") : null,
+      badge(mt5Text, !mt5 ? "" : mt5.status === "connected" ? "ok" : mt5.status === "error" ? "err" : "wait"))
   );
+  if (u.stats) card.append(statsBlock(u.stats));
 
   const grid = el("div", {class: "grid"});
-  // Statut : pas pour soi-même ni le propriétaire ; les admins ne gèrent que les clients
-  const canStatus = !isMe && !isOwnerRow && (owner || u.role === "user");
-  if (canStatus) grid.append(field("Statut", "status", u, ["pending", "active", "revoked"], LABELS.status));
-  // Source : les admins pour les clients, le propriétaire pour tout le monde (y compris lui)
-  const canSource = owner || !isOwnerRow;
-  if (canSource) grid.append(field("Signaux", "source", u, ["none", "gael", "amin", "both"], LABELS.signal_source, "signal_source"));
-  // Rôle : propriétaire uniquement, jamais sur lui-même
-  if (owner && !isOwnerRow) grid.append(field("Rôle", "role", u, ["user", "admin"], LABELS.role));
+  if (!isMe && !isOwnerRow && (owner || u.role === "user")) grid.append(selectField("Statut", u.status, ["pending", "active", "revoked"], LABELS.status, v => changeStatus(u, v)));
+  if (owner && !isOwnerRow) grid.append(selectField("Rôle", u.role, ["user", "admin"], LABELS.role, v => changeRole(u, v)));
+  if (owner && u.role === "user") {
+    const opts = {"": "— Aucun —"};
+    admin.admins.forEach(a => opts[a.telegram_id] = a.name);
+    grid.append(selectField("Administrateur", u.referrer ? String(u.referrer.telegram_id) : "", Object.keys(opts), opts, v => changeReferrer(u, v)));
+  }
   if (grid.children.length) card.append(grid);
+
+  // Sources suivies
+  const grantable = admin.grantable_sources;
+  if (grantable.length && (u.role === "user" || owner)) {
+    const mine = new Set(u.sources.map(s => s.id));
+    const checks = el("div", {class: "checks"});
+    for (const s of grantable) {
+      const cb = el("input", {type: "checkbox", checked: mine.has(s.id)});
+      cb.dataset.id = s.id;
+      cb.addEventListener("change", async () => {
+        const ids = [...checks.querySelectorAll("input")].filter(x => x.checked).map(x => Number(x.dataset.id));
+        try { await post(`/admin/users/${u.telegram_id}/sources`, {source_ids: ids}); toast("Sources mises à jour"); await loadAdmin(); if (isMe) loadAccount(); }
+        catch (e) { toast(e.message); cb.checked = !cb.checked; }
+      });
+      checks.append(el("label", {class: "check"}, cb, s.name));
+    }
+    card.append(el("label", {text: "Signaux suivis"}), checks);
+  } else if (u.sources.length) {
+    card.append(el("p", {class: "hint", text: "Signaux suivis : " + u.sources.map(s => s.name).join(", ")}));
+  }
+
+  // Trades détaillés
+  const panel = el("div", {class: "panel hidden"});
+  const btn = el("button", {class: "secondary", text: "Voir les trades"});
+  btn.addEventListener("click", async () => {
+    if (!panel.classList.contains("hidden")) { panel.classList.add("hidden"); btn.textContent = "Voir les trades"; openPanels.delete(u.telegram_id); return; }
+    btn.textContent = "Chargement…";
+    try {
+      const {stats} = await api(`/admin/users/${u.telegram_id}/trades`);
+      panel.replaceChildren(tradesList(stats));
+      panel.classList.remove("hidden"); btn.textContent = "Masquer les trades"; openPanels.add(u.telegram_id);
+    } catch (e) { toast(e.message); btn.textContent = "Voir les trades"; }
+  });
+  if (u.stats) card.append(btn, panel);
   return card;
 }
 
-function field(label, kind, u, values, labels, key) {
-  key = key || kind;
+function selectField(label, value, values, labels, onChange) {
   const select = el("select", {}, ...values.map(v => el("option", {value: v, text: labels[v]})));
-  select.value = u[key];
+  select.value = value;
   select.addEventListener("change", async () => {
-    const value = select.value;
-    if (kind === "status" && value === "revoked" && !await confirmBox(`Révoquer ${u.full_name} ? Son compte MT5 sera déconnecté et la copie arrêtée.`)) { select.value = u[key]; return; }
-    if (kind === "role" && value === "admin" && !await confirmBox(`Nommer ${u.full_name} administrateur ? Il pourra activer et révoquer les clients.`)) { select.value = u[key]; return; }
+    const v = select.value;
     select.disabled = true;
-    try {
-      const updated = await post(`/admin/users/${u.telegram_id}/${kind}`, {[kind]: value});
-      Object.assign(u, updated);
-      toast("Enregistré : " + (u.full_name || u.telegram_id));
-      renderUsers();
-      if (u.telegram_id === me.telegram_id) loadAccount();
-    } catch (e) { toast(e.message); select.value = u[key]; }
+    try { if (await onChange(v) === false) select.value = value; }
+    catch (e) { toast(e.message); select.value = value; }
     finally { select.disabled = false; }
   });
   return el("div", {}, el("label", {text: label}), select);
+}
+
+async function changeStatus(u, v) {
+  if (v === "revoked" && !await confirmBox(`Révoquer ${u.full_name} ? Son compte MT5 sera déconnecté et la copie arrêtée.`)) return false;
+  await post(`/admin/users/${u.telegram_id}/status`, {status: v});
+  toast("Statut enregistré"); await loadAdmin();
+}
+async function changeRole(u, v) {
+  if (v === "admin" && !await confirmBox(`Nommer ${u.full_name} administrateur ? Un code de parrainage lui sera créé et envoyé.`)) return false;
+  await post(`/admin/users/${u.telegram_id}/role`, {role: v});
+  toast(v === "admin" ? "Administrateur nommé, son code lui a été envoyé" : "Rôle retiré"); await loadAdmin();
+}
+async function changeReferrer(u, v) {
+  await post(`/admin/users/${u.telegram_id}/referrer`, {admin_id: v ? Number(v) : null});
+  toast("Administrateur du client modifié"); await loadAdmin();
 }
 
 // ---------------------------------------------------------------- démarrage
