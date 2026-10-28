@@ -2,79 +2,313 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Copy Trading</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060504">
+<title>Ascend · Copy Trading</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:light dark;--hint:var(--tg-theme-hint-color,#9ca3af);--card:var(--tg-theme-secondary-bg-color,#1f2937);--bg:var(--tg-theme-bg-color,#111827);--line:rgba(148,163,184,.22);--btn:var(--tg-theme-button-color,#2563eb)}
-*{box-sizing:border-box}
-body{margin:0;padding:20px 16px 32px;font-family:system-ui,sans-serif;background:var(--bg);color:var(--tg-theme-text-color,#f9fafb)}
-main{max-width:560px;margin:auto}.brand{font-size:13px;letter-spacing:.16em;opacity:.7;font-weight:700}
-h1{font-size:26px;margin:8px 0 4px}h2{margin:10px 0 6px;font-size:20px}h3{margin:0;font-size:16px}
-p{color:var(--hint);line-height:1.5;margin:6px 0}
-.card{margin-top:16px;padding:18px;border-radius:18px;background:var(--card)}
-.status{display:inline-block;border-radius:999px;padding:5px 10px;background:#334155;font-size:12px;color:#fff;white-space:nowrap}
-.ok{background:#166534!important}.err{background:#7f1d1d!important}.wait{background:#92400e!important}.blue{background:#1e40af!important}
-.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
-.row span:first-child{color:var(--hint)}.row span:last-child{text-align:right;word-break:break-word}
-label{display:block;font-size:13px;margin:12px 0 6px;color:var(--hint)}
-input,select{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:inherit;font-size:16px}
-button{width:100%;border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;margin-top:14px;color:var(--tg-theme-button-text-color,#fff);background:var(--btn)}
-button.secondary{background:transparent;color:var(--hint);border:1px solid var(--line)}
-button.danger{background:#b91c1c;color:#fff}button.small{width:auto;padding:8px 12px;font-size:13px;margin:0}
-button:disabled{opacity:.5}.hint{font-size:12px}.hidden{display:none!important}
-.tabs{display:flex;gap:8px;margin-top:16px}.tabs button{margin:0;background:var(--card);color:var(--hint)}
-.tabs button.active{background:var(--btn);color:#fff}
-.item{padding:14px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
-.head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.grid label{margin:0 0 4px}
-.toolbar{display:flex;gap:8px;align-items:center;margin-top:10px}.toolbar input{flex:1}
-.toast{position:fixed;left:16px;right:16px;bottom:16px;max-width:560px;margin:auto;padding:12px 14px;border-radius:12px;background:#111;color:#fff;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:10}
-.switch{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
-.muted{color:var(--hint);font-size:13px}
-.code{font-size:30px;font-weight:800;letter-spacing:.18em;text-align:center;padding:14px;border-radius:12px;background:var(--bg);margin-top:8px;font-family:ui-monospace,monospace}
-.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-.check{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:13px;cursor:pointer;margin:0;color:inherit}
-.check input{width:auto;margin:0}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.stat{background:var(--bg);border-radius:10px;padding:8px;text-align:center}.stat b{display:block;font-size:15px}.stat span{font-size:11px;color:var(--hint)}
-.pos{color:#22c55e}.neg{color:#ef4444}
-.trade{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line)}
-.panel{margin-top:10px;padding:10px;border-radius:12px;background:var(--bg)}
+:root{
+  color-scheme:dark;
+  --ink:#060504;--night:#0c0b09;--panel:#13110e;--raised:#1b1814;
+  --line:#d4af5f1c;--line-strong:#d4af5f3d;
+  --gold:#d4a64a;--gold-light:#f3d68c;--cream:#f4efe4;--mute:#a39c8e;--faint:#6d675c;
+  --ok:#4fd18b;--bad:#f06a6a;--warn:#f0b44c;--info:#8fb1ff;
+  --gold-grad:linear-gradient(180deg,#f8e3a5 0%,#d4a64a 55%,#9c7128 100%);
+  --btn-grad:linear-gradient(180deg,#f1d182 0%,#d4a64a 55%,#b8893a 100%);
+  --display:"Cinzel",Georgia,serif;--sans:"Inter",system-ui,-apple-system,sans-serif;
+  --safe-b:max(env(safe-area-inset-bottom,0px),var(--tg-content-safe-area-inset-bottom,0px));
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:var(--sans);color:var(--cream);background:var(--ink);
+  background-image:radial-gradient(90% 45% at 80% -10%,rgba(212,166,74,.10),transparent 60%),radial-gradient(60% 40% at -10% 110%,rgba(212,166,74,.05),transparent 60%);
+  background-attachment:fixed;-webkit-font-smoothing:antialiased;
+  padding-bottom:calc(92px + var(--safe-b));
+}
+button,input,select{font-family:inherit}
+.hidden{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+
+/* ------------------------------------------------ en-tête */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 16px;background:rgba(6,5,4,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top::before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,rgba(212,166,74,.4),transparent)}
+.brandrow{display:flex;align-items:center;gap:8px;min-width:0}
+.brandrow img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(212,166,74,.35))}
+.wordmark{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:.2em;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.topright{display:flex;align-items:center;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-strong);background:rgba(27,24,20,.8);border-radius:999px;padding:5px 10px;font-size:11.5px;font-weight:600;color:var(--mute);white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}
+.pill.ok .dot{background:var(--ok);box-shadow:0 0 0 3px rgba(79,209,139,.15)}
+.pill.err .dot{background:var(--bad)}
+.pill.wait .dot{background:var(--warn);animation:pulse 1.4s infinite}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-strong);background:var(--raised);font-size:12px;font-weight:600;color:var(--gold-light);letter-spacing:.04em}
+
+main{max-width:560px;margin:0 auto;padding:18px 16px 8px}
+.greet{color:var(--mute);font-size:15px;margin:2px 0 0}
+h1.hello{font-family:var(--display);font-weight:600;font-size:30px;margin:2px 0 18px;letter-spacing:.02em;line-height:1.15}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.pagetitle{font-family:var(--display);font-weight:600;font-size:26px;margin:4px 0 6px;line-height:1.2}
+.pagetitle em{font-style:normal;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--mute);font-size:14.5px;line-height:1.55;margin:0 0 16px}
+.section{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin:24px 2px 10px;display:flex;justify-content:space-between;align-items:center}
+.section a{color:var(--gold);text-decoration:none;letter-spacing:.06em;font-size:12px;text-transform:none;font-weight:600;cursor:pointer}
+
+/* ------------------------------------------------ cartes */
+.card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(27,24,20,.92),rgba(17,15,13,.92));border-radius:20px;box-shadow:inset 0 1px rgba(255,240,200,.04);padding:18px;margin-top:14px}
+.card-gold{border:1px solid var(--line-strong);background:radial-gradient(120% 120% at 100% 0,rgba(212,166,74,.16),transparent 55%),linear-gradient(180deg,rgba(30,26,20,.95),rgba(17,15,13,.95));box-shadow:inset 0 1px rgba(255,230,170,.08),0 20px 40px -24px rgba(212,166,74,.35)}
+.card:first-child{margin-top:0}
+.cardhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.cardtitle{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.02em;margin:0}
+.cardtitle svg{color:var(--gold);flex:none}
+.card p{color:var(--mute);font-size:14px;line-height:1.5;margin:6px 0}
+.hint{font-size:12.5px!important;color:var(--faint)!important}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ------------------------------------------------ héros (solde) */
+.hero{position:relative;overflow:hidden}
+.herotop{display:flex;align-items:center;gap:16px}
+.herotop .main{flex:1;min-width:0}
+.big{font-family:var(--sans);font-weight:700;font-size:32px;letter-spacing:-.01em;margin:4px 0 2px;line-height:1.1}
+.big small{font-size:15px;font-weight:600;color:var(--mute);margin-left:4px}
+.sub{color:var(--mute);font-size:13px}
+.ring{position:relative;width:84px;height:84px;flex:none}
+.ring svg{width:84px;height:84px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:6}
+.ring .bg{stroke:rgba(212,175,95,.12)}
+.ring .fg{stroke:url(#goldgrad);stroke-linecap:round;transition:stroke-dashoffset 1s var(--ease)}
+.ring .lbl{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .lbl b{font-size:18px;font-weight:700}
+.ring .lbl span{font-size:9px;letter-spacing:.14em;color:var(--mute);text-transform:uppercase;margin-top:1px}
+.divider{height:1px;background:var(--line);margin:16px 0 14px}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
+.trio b{display:block;font-size:16px;font-weight:700}
+.trio span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.herofoot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:var(--faint)}
+.pos{color:var(--ok)!important}.neg{color:var(--bad)!important}
+
+/* ------------------------------------------------ raccourcis */
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.qa{border:1px solid var(--line);background:linear-gradient(180deg,rgba(27,24,20,.92),rgba(17,15,13,.92));border-radius:16px;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:7px;color:var(--cream);font-size:12.5px;cursor:pointer;transition:transform .15s,border-color .15s}
+.qa:active{transform:scale(.96)}
+.qa .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(212,166,74,.1);color:var(--gold-light)}
+.qa.primary .ic{background:var(--btn-grad);color:#1a1206;box-shadow:inset 0 1px rgba(255,255,255,.3),0 8px 20px -8px rgba(212,166,74,.7)}
+
+/* ------------------------------------------------ étapes (checklist) */
+.steps{padding:4px 0}
+.step{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+.step:last-child{border-bottom:0}
+.step .ck{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--faint);display:grid;place-items:center;flex:none;color:#1a1206}
+.step.done .ck{border:0;background:var(--btn-grad)}
+.step .ck svg{width:14px;height:14px;stroke-width:3}
+.step .tx{flex:1;min-width:0}
+.step .tx b{display:block;font-weight:500;font-size:15px}
+.step.done .tx b{color:var(--mute)}
+.step .tx span{font-size:12.5px;color:var(--faint)}
+.step .chev{color:var(--faint)}
+
+/* ------------------------------------------------ listes de trades */
+.list{padding:2px 0}
+.trow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.trow:last-child{border-bottom:0}
+.side{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:10px;font-weight:700;letter-spacing:.06em;flex:none}
+.side.buy{background:rgba(79,209,139,.12);color:var(--ok)}
+.side.sell{background:rgba(240,106,106,.12);color:var(--bad)}
+.trow .tx{flex:1;min-width:0}
+.trow .tx b{display:block;font-size:14.5px;font-weight:600}
+.trow .tx span{font-size:12px;color:var(--faint);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow .pl{font-weight:700;font-size:14.5px;text-align:right;white-space:nowrap}
+.empty{padding:26px 16px;text-align:center;color:var(--faint);font-size:13.5px}
+.empty svg{width:28px;height:28px;color:var(--gold);opacity:.6;display:block;margin:0 auto 8px}
+.card.flush{padding:0;overflow:hidden}
+
+/* ------------------------------------------------ contrôles */
+.seg{display:flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:14px;background:rgba(6,5,4,.5);margin:6px 0 4px}
+.seg button{flex:1;border:0;background:transparent;color:var(--mute);font-weight:600;font-size:13.5px;padding:10px 6px;border-radius:10px;cursor:pointer;transition:background .2s,color .2s}
+.seg button.active{background:linear-gradient(180deg,rgba(212,166,74,.22),rgba(212,166,74,.12));color:var(--gold-light);box-shadow:inset 0 1px rgba(255,230,170,.08)}
+label{display:block;font-size:10.9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:16px 0 7px}
+input,select{width:100%;border:1px solid var(--line);color:var(--cream);background:rgba(6,5,4,.6);border-radius:13px;padding:12px 14px;font-size:16px;transition:border-color .15s,box-shadow .15s;outline:none}
+input::placeholder{color:var(--faint)}
+input:focus,select:focus{border-color:rgba(212,166,74,.6);box-shadow:0 0 0 3px rgba(212,166,74,.12)}
+select{appearance:none;-webkit-appearance:none;padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a39c8e' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+select option{background:var(--panel)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin-top:16px;border:0;border-radius:14px;padding:12px 16px;font-size:15px;font-weight:600;cursor:pointer;color:#1a1206;background:var(--btn-grad);box-shadow:inset 0 1px rgba(255,255,255,.3),0 8px 24px -10px rgba(212,166,74,.7);transition:transform .15s,filter .15s,opacity .15s}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5}
+.btn.ghost{background:transparent;color:var(--cream);border:1px solid var(--line-strong);box-shadow:none}
+.btn.danger{background:linear-gradient(180deg,#f08a8a,#c94b4b);color:#fff;box-shadow:0 8px 24px -12px rgba(240,106,106,.6)}
+.btn.sm{white-space:nowrap;width:auto;min-height:36px;margin:0;padding:7px 13px;font-size:13px;border-radius:11px}
+.btn svg{width:17px;height:17px}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.btnrow .btn{margin:0}
+.rows{margin-top:4px}
+.row{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.row:last-child{border-bottom:0}
+.row span:first-child{color:var(--mute)}
+.row span:last-child{text-align:right;word-break:break-word;font-weight:500}
+.status{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:600;white-space:nowrap;background:rgba(163,156,142,.12);color:var(--mute)}
+.status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.status.ok{background:rgba(79,209,139,.12);color:var(--ok)}
+.status.err{background:rgba(240,106,106,.12);color:var(--bad)}
+.status.wait{background:rgba(240,180,76,.12);color:var(--warn)}
+.status.blue{background:rgba(212,166,74,.14);color:var(--gold-light)}
+.status.nodot::before{display:none}
+.code{font-family:var(--display);font-size:32px;font-weight:700;letter-spacing:.24em;text-align:center;padding:18px 10px;border-radius:16px;margin-top:12px;border:1px dashed var(--line-strong);background:rgba(6,5,4,.55)}
+.code span{background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ------------------------------------------------ admin */
+.item{padding:16px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0;padding-bottom:4px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.head h3{margin:0;font-size:15.5px;font-weight:600}
+.muted{color:var(--faint);font-size:12.5px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.grid label{margin-top:10px}
+.toolbar{display:flex;gap:8px;align-items:center;margin-top:12px}
+.toolbar input{flex:1}
+.toolbar select{width:auto;flex:none}
+.switch{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.switch:last-child{border-bottom:0}
+.switch h3{margin:0 0 2px;font-size:15px;font-weight:600}
+.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.check{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-size:13px;cursor:pointer;margin:0;color:var(--cream);text-transform:none;letter-spacing:0;font-weight:500;transition:border-color .15s,background .15s}
+.check:has(input:checked){border-color:rgba(212,166,74,.5);background:rgba(212,166,74,.1);color:var(--gold-light)}
+.check input{width:16px;height:16px;margin:0;accent-color:var(--gold);padding:0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat{background:rgba(6,5,4,.55);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
+.stat b{display:block;font-size:14px;font-weight:700}
+.stat span{font-size:10px;color:var(--mute);letter-spacing:.06em}
+.panel{margin-top:10px;border-radius:14px;background:rgba(6,5,4,.55);border:1px solid var(--line);overflow:hidden}
+.panel h4{margin:0;padding:12px 16px 4px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600}
+
+/* ------------------------------------------------ barre d'onglets */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;align-items:stretch;
+  padding:8px 8px calc(8px + var(--safe-b));background:rgba(8,7,6,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line)}
+.nav button{flex:1;max-width:120px;border:0;background:transparent;color:var(--faint);display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;font-size:11.5px;font-weight:500;cursor:pointer;position:relative;transition:color .2s}
+.nav button svg{width:23px;height:23px;transition:transform .25s var(--ease)}
+.nav button.active{color:var(--gold-light)}
+.nav button.active svg{transform:translateY(-1px)}
+.nav button.active::before{content:"";position:absolute;top:-9px;width:28px;height:2px;border-radius:2px;background:var(--gold-grad);box-shadow:0 0 12px rgba(212,166,74,.8)}
+.nav .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--bad);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+
+/* ------------------------------------------------ animations */
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes pulse{50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.view>*{animation:rise .45s var(--ease) both}
+.view>*:nth-child(2){animation-delay:.05s}.view>*:nth-child(3){animation-delay:.1s}.view>*:nth-child(4){animation-delay:.15s}.view>*:nth-child(5){animation-delay:.2s}.view>*:nth-child(6){animation-delay:.25s}.view>*:nth-child(n+7){animation-delay:.3s}
+.skel{display:block;border-radius:8px;background:linear-gradient(90deg,rgba(212,175,95,.06) 25%,rgba(212,175,95,.15) 50%,rgba(212,175,95,.06) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite linear}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(26,18,6,.3);border-top-color:#1a1206;animation:spin .7s linear infinite}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(88px + var(--safe-b));max-width:528px;margin:auto;padding:13px 16px;border-radius:14px;background:rgba(27,24,20,.97);border:1px solid var(--line-strong);color:var(--cream);font-size:14px;box-shadow:0 14px 40px rgba(0,0,0,.5);z-index:40;display:flex;gap:10px;align-items:center;transition:opacity .25s,transform .25s var(--ease)}
+.toast.off{opacity:0;transform:translateY(12px);pointer-events:none}
+.toast::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);flex:none}
+.toast.bad::before{background:var(--bad)}.toast.good::before{background:var(--ok)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><linearGradient id="goldgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8e3a5"/><stop offset=".55" stop-color="#d4a64a"/><stop offset="1" stop-color="#9c7128"/></linearGradient></defs>
+</svg>
+
+<header class="top">
+  <div class="brandrow">
+    <img id="logo" src="https://ascend-academy-iota.vercel.app/logo.png" alt="" onerror="this.remove()">
+    <span class="wordmark">ASCEND</span>
+  </div>
+  <div class="topright">
+    <span class="pill wait" id="badge"><span class="dot"></span><span>Connexion…</span></span>
+    <div class="avatar" id="avatar">·</div>
+  </div>
+</header>
+
 <main>
-<div class="brand">COPY TRADING</div>
-<h1 id="hello">Bienvenue 👋</h1>
+<!-- ============ ACCUEIL ============ -->
+<div id="tab-home" class="view">
+  <div>
+    <p class="greet" id="greet">Bonjour,</p>
+    <h1 class="hello" id="hello">Trader</h1>
+  </div>
 
-<div class="tabs hidden" id="tabs">
-  <button class="active" data-tab="home">Mon compte</button>
-  <button data-tab="admin">Administration</button>
-</div>
-
-<!-- ============ MON COMPTE ============ -->
-<div id="tab-home">
-  <section class="card">
-    <span class="status" id="badge">Connexion en cours…</span>
-    <h2>Mon compte</h2>
-    <div id="account"><p>Vérification de ton identité Telegram…</p></div>
+  <section class="card card-gold hero" id="hero">
+    <div class="herotop">
+      <div class="main">
+        <div class="eyebrow">Solde du compte</div>
+        <span class="skel" style="height:34px;width:70%;margin:8px 0 8px"></span>
+        <span class="skel" style="height:12px;width:50%"></span>
+      </div>
+      <span class="skel" style="width:84px;height:84px;border-radius:50%"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="trio">
+      <div><span class="skel" style="height:16px;width:60%;margin:0 auto 6px"></span><span>Aujourd'hui</span></div>
+      <div><span class="skel" style="height:16px;width:60%;margin:0 auto 6px"></span><span>7 jours</span></div>
+      <div><span class="skel" style="height:16px;width:60%;margin:0 auto 6px"></span><span>30 jours</span></div>
+    </div>
   </section>
 
+  <div class="quick">
+    <div class="qa primary" data-go="trades"><div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></div>Trades</div>
+    <div class="qa" data-go="account" data-focus="mt5card"><div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/></svg></div>MT5</div>
+    <div class="qa" data-go="account" data-focus="profilecard"><div class="ic"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/></svg></div>Signaux</div>
+    <div class="qa" id="refreshAll"><div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>Actualiser</div>
+  </div>
+
+  <div class="section" id="stepsTitle">Ma configuration</div>
+  <section class="card flush" id="stepscard"><div class="steps" id="steps">
+    <div class="step"><span class="skel" style="width:24px;height:24px;border-radius:50%"></span><div class="tx"><span class="skel" style="height:14px;width:60%"></span></div></div>
+    <div class="step"><span class="skel" style="width:24px;height:24px;border-radius:50%"></span><div class="tx"><span class="skel" style="height:14px;width:45%"></span></div></div>
+    <div class="step"><span class="skel" style="width:24px;height:24px;border-radius:50%"></span><div class="tx"><span class="skel" style="height:14px;width:55%"></span></div></div>
+  </div></section>
+
+  <div class="section">Positions ouvertes <a data-go="trades">Tout voir</a></div>
+  <section class="card flush"><div class="list" id="homeOpen"><div class="empty">Chargement…</div></div></section>
+</div>
+
+<!-- ============ TRADES ============ -->
+<div id="tab-trades" class="view hidden">
+  <div>
+    <div class="eyebrow">Copie automatique</div>
+    <h1 class="pagetitle">Mes <em>trades</em></h1>
+    <p class="lead" id="tradesLead">Les positions ouvertes par les signaux que tu suis, et ton historique des 30 derniers jours.</p>
+  </div>
+  <div class="seg" id="tradeSeg">
+    <button class="active" data-v="open">En cours</button>
+    <button data-v="closed">Historique</button>
+  </div>
+  <section class="card flush"><div class="list" id="tradesList"><div class="empty">Chargement…</div></div></section>
+  <p class="hint" id="tradesFoot" style="text-align:center;margin:14px 0 0"></p>
+</div>
+
+<!-- ============ COMPTE ============ -->
+<div id="tab-account" class="view hidden">
+  <div>
+    <div class="eyebrow">Paramètres</div>
+    <h1 class="pagetitle">Mon <em>compte</em></h1>
+  </div>
+
   <section class="card hidden" id="codecard">
-    <h2>Code de parrainage</h2>
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 9.2-9.2M17 6l3 3M15 8l2 2"/></svg>Code de parrainage</h2>
     <p>Entre le code que t'a donné ton administrateur pour être rattaché à lui.</p>
     <form id="codeform" autocomplete="off">
-      <input id="codeinput" required placeholder="ex. K7Q2MX" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="20">
-      <button type="submit">Valider le code</button>
+      <input id="codeinput" required placeholder="ex. K7Q2MX" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="20" style="text-transform:uppercase;letter-spacing:.14em;margin-top:8px">
+      <button class="btn" type="submit">Valider le code <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </form>
   </section>
 
   <section class="card hidden" id="mt5card">
-    <span class="status" id="mt5badge">—</span>
-    <h2>Mon compte MT5</h2>
-    <div id="mt5info"></div>
+    <div class="cardhead">
+      <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="14.5" r="1"/></svg>Compte MT5</h2>
+      <span class="status" id="mt5badge">—</span>
+    </div>
+    <div id="mt5info" class="rows"></div>
     <form id="mt5form" class="hidden" autocomplete="off">
       <p>Connecte ton compte MT5 pour que les signaux soient copiés automatiquement. Tu n'as rien à installer.</p>
       <label for="login">Numéro de compte</label>
@@ -84,72 +318,88 @@ button:disabled{opacity:.5}.hint{font-size:12px}.hidden{display:none!important}
       <label for="server">Serveur</label>
       <input id="server" required placeholder="ex. VantageMarkets-Demo" autocapitalize="off" autocorrect="off" spellcheck="false">
       <p class="hint">Le serveur est indiqué dans le mail de ton courtier ou dans MT5 (Fichier &gt; Se connecter au compte de trading). Le mot de passe est chiffré et n'est jamais affiché. Le compte doit être en mode Hedging.</p>
-      <button type="submit" id="mt5submit">Connecter mon compte</button>
+      <button class="btn" type="submit" id="mt5submit">Connecter mon compte</button>
     </form>
-    <button class="secondary hidden" id="mt5change">Changer de compte</button>
-    <button class="secondary hidden" id="mt5remove">Déconnecter mon compte</button>
+    <div class="btnrow">
+      <button class="btn ghost hidden" id="mt5change">Changer</button>
+      <button class="btn ghost hidden" id="mt5remove">Déconnecter</button>
+    </div>
   </section>
 
-  <section class="card hidden" id="mytrades">
-    <h2>Mes résultats</h2>
-    <div id="mytradesbody"></div>
+  <section class="card" id="profilecard">
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Mon profil</h2>
+    <div id="account" class="rows"><span class="skel" style="height:14px;margin:14px 0"></span><span class="skel" style="height:14px;margin:14px 0;width:70%"></span></div>
   </section>
 </div>
 
 <!-- ============ ADMINISTRATION ============ -->
-<div id="tab-admin" class="hidden">
-  <section class="card">
-    <h2>Mon code de parrainage</h2>
-    <p>Donne ce code à tes clients : en l'entrant dans l'application, ils sont rattachés à toi. Toi seul le vois.</p>
-    <div class="code" id="mycode">—</div>
-    <div class="grid">
-      <button class="secondary" id="copycode" style="margin:0">Copier</button>
-      <button id="sharecode" style="margin:0">Partager</button>
+<div id="tab-admin" class="view hidden">
+  <div>
+    <div class="eyebrow">Espace administrateur</div>
+    <h1 class="pagetitle"><em>Administration</em></h1>
+  </div>
+
+  <section class="card card-gold">
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 9.2-9.2M17 6l3 3M15 8l2 2"/></svg>Mon code de parrainage</h2>
+    <p>Donne ce code à tes clients : en l'entrant dans l'application, ils sont rattachés à toi.</p>
+    <div class="code"><span id="mycode">——</span></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="copycode"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>Copier</button>
+      <button class="btn" id="sharecode"><svg class="i" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Partager</button>
     </div>
   </section>
 
   <section class="card hidden" id="copycard">
-    <h2>Copie des trades</h2>
-    <div id="services"></div>
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Copie des trades</h2>
+    <div id="services" class="rows"></div>
     <div class="switch">
       <div><h3>Mode</h3><span class="muted" id="modeText">—</span></div>
-      <button class="small" id="modeBtn">—</button>
+      <button class="btn sm" id="modeBtn">—</button>
     </div>
     <div class="switch">
       <div><h3>Arrêt d'urgence</h3><span class="muted" id="stopText">—</span></div>
-      <button class="small" id="stopBtn">—</button>
+      <button class="btn sm" id="stopBtn">—</button>
     </div>
   </section>
 
   <section class="card hidden" id="sourcecard">
-    <div class="head"><h2>Sources de signaux</h2><button class="small secondary" id="refreshDialogs">Actualiser les canaux</button></div>
+    <div class="cardhead">
+      <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/></svg>Sources de signaux</h2>
+      <button class="btn sm ghost" id="refreshDialogs">Actualiser</button>
+    </div>
     <p class="hint">Une source = un nom, un canal Telegram écouté, et les administrateurs qui peuvent la donner à leurs clients.</p>
     <div id="sources"></div>
     <div class="toolbar">
       <input id="newsource" placeholder="Nom de la nouvelle source" maxlength="60">
-      <button class="small" id="addsource">Ajouter</button>
+      <button class="btn sm" id="addsource">Ajouter</button>
     </div>
   </section>
 
   <section class="card">
-    <h2 id="usersTitle">Mes clients</h2>
-    <div id="userStats" class="muted"></div>
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.5 2.4 3.5 5.2"/></svg><span id="usersTitle">Mes clients</span></h2>
+    <div id="userStats" class="muted" style="margin-top:6px"></div>
     <div class="toolbar">
-      <input id="search" placeholder="Rechercher un nom, @pseudo ou ID">
-      <select id="filter" style="width:auto">
+      <input id="search" placeholder="Nom, @pseudo ou ID">
+      <select id="filter">
         <option value="all">Tous</option>
         <option value="pending">En attente</option>
         <option value="active">Actifs</option>
         <option value="revoked">Révoqués</option>
       </select>
     </div>
-    <div id="users"><p>Chargement…</p></div>
+    <div id="users"><span class="skel" style="height:60px;margin-top:16px;border-radius:12px"></span></div>
   </section>
 </div>
-
-<button id="close">Fermer</button>
 </main>
-<div class="toast hidden" id="toast"></div>
+
+<nav class="nav" id="nav">
+  <button class="active" data-tab="home"><svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Accueil</button>
+  <button data-tab="trades"><svg class="i" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>Trades</button>
+  <button data-tab="account"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Compte</button>
+  <button data-tab="admin" class="hidden" id="navAdmin"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>Admin<span class="badge hidden" id="pendingBadge">0</span></button>
+</nav>
+<div class="toast off" id="toast"></div>
+
 <script>
 // Adresse du tunnel : à mettre à jour à chaque nouveau lancement de cloudflared
 const API_URL = "https://accent-ports-electron-networking.trycloudflare.com";
@@ -163,7 +413,8 @@ const STATUS_CLASS = {pending: "wait", active: "ok", revoked: "err"};
 
 const tg = window.Telegram && window.Telegram.WebApp;
 const $ = id => document.getElementById(id);
-let me = null, admin = null, sourcesData = null, pollTimer = null, adminTimer = null;
+let me = null, mt5acc = undefined, myStats = undefined, admin = null, sourcesData = null;
+let pollTimer = null, adminTimer = null, tradesTimer = null, tradeView = "open", currentTab = "home";
 const openPanels = new Set();
 
 // ---------------------------------------------------------------- outils
@@ -179,15 +430,40 @@ function el(tag, attrs = {}, ...children) {
   for (const c of children) if (c !== null && c !== undefined && c !== false) e.append(c);
   return e;
 }
+const ICONS = {
+  check: '<path d="m5 12 5 5 9-10"/>',
+  chev: '<path d="m9 6 6 6-6 6"/>',
+  chart: '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+};
+function icon(name, cls = "i") {
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("class", cls); s.innerHTML = ICONS[name];
+  return s;
+}
 const badge = (text, cls) => el("span", {class: "status " + (cls || ""), text});
 function setBadge(node, text, cls) { node.textContent = text; node.className = "status " + (cls || ""); }
+function setPill(text, cls) {
+  const p = $("badge"); p.className = "pill " + (cls || "");
+  p.replaceChildren(el("span", {class: "dot"}), el("span", {text}));
+}
 function rows(container, list) {
   container.replaceChildren(...list.map(([a, b]) => el("div", {class: "row"}, el("span", {text: a}), el("span", {text: b}))));
 }
 function message(container, text) { container.replaceChildren(el("p", {text})); }
-function toast(text) {
-  const t = $("toast"); t.textContent = text; t.classList.remove("hidden");
-  clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.add("hidden"), 3500);
+function haptic(kind = "light") {
+  try {
+    if (!tg || !tg.HapticFeedback) return;
+    if (["success", "error", "warning"].includes(kind)) tg.HapticFeedback.notificationOccurred(kind);
+    else if (kind === "select") tg.HapticFeedback.selectionChanged();
+    else tg.HapticFeedback.impactOccurred(kind);
+  } catch (e) {}
+}
+function toast(text, kind) {
+  const t = $("toast"); t.textContent = text;
+  t.className = "toast" + (kind === "bad" ? " bad" : kind === "good" ? " good" : "");
+  haptic(kind === "bad" ? "error" : kind === "good" ? "success" : "light");
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.add("off"), 3500);
 }
 function ago(ts) {
   if (!ts) return "jamais";
@@ -198,16 +474,21 @@ function ago(ts) {
   return "il y a " + Math.round(s / 86400) + " j";
 }
 const fmt = v => (v === null || v === undefined) ? "—" : Number(v).toLocaleString("fr-FR", {maximumFractionDigits: 2});
-const money = (v, cur) => (v === null || v === undefined) ? "—" : fmt(v) + " " + (cur || "");
-const signed = (v, cur) => (v === null || v === undefined) ? "—" : (v > 0 ? "+" : "") + fmt(v) + " " + (cur || "");
+const fmt2 = v => Number(v).toLocaleString("fr-FR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const CUR = {EUR: "€", USD: "$", GBP: "£"};
+const cur = c => CUR[c] || c || "";
+const money = (v, c) => (v === null || v === undefined) ? "—" : fmt2(v) + " " + cur(c);
+const signed = (v, c) => (v === null || v === undefined) ? "—" : (v > 0 ? "+" : "") + fmt2(v) + " " + cur(c);
 const pnlClass = v => v > 0 ? "pos" : v < 0 ? "neg" : "";
 const date = ts => new Date(ts * 1000).toLocaleString("fr-FR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"});
 function confirmBox(text) {
   return new Promise(resolve => {
+    haptic("warning");
     if (tg && tg.showConfirm) tg.showConfirm(text, ok => resolve(ok));
     else resolve(window.confirm(text));
   });
 }
+const isAdminUser = () => me && (me.role === "admin" || me.role === "super_admin");
 
 async function api(path, options = {}) {
   if (API_URL.startsWith("COLLE")) throw new Error("Adresse de l'API non configurée");
@@ -225,64 +506,179 @@ async function api(path, options = {}) {
 }
 const post = (path, body) => api(path, {method: "POST", body: JSON.stringify(body || {})});
 
-// ---------------------------------------------------------------- statistiques (partagé client / admin)
+// ---------------------------------------------------------------- navigation
+function showTab(name, focusId) {
+  if (name === "admin" && $("navAdmin").classList.contains("hidden")) name = "home";
+  if (name !== currentTab) haptic("select");
+  currentTab = name;
+  document.querySelectorAll("#nav button").forEach(x => x.classList.toggle("active", x.dataset.tab === name));
+  for (const t of ["home", "trades", "account", "admin"]) {
+    const v = $("tab-" + t);
+    const show = t === name;
+    if (show && v.classList.contains("hidden")) { v.classList.remove("hidden"); v.style.animation = "none"; void v.offsetWidth; v.style.animation = ""; }
+    else if (!show) v.classList.add("hidden");
+  }
+  if (focusId) setTimeout(() => $(focusId).scrollIntoView({behavior: "smooth", block: "start"}), 60);
+  else window.scrollTo(0, 0);
+  if (name === "admin") loadAdmin();
+  updateBackButton();
+}
+document.querySelectorAll("#nav button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+document.addEventListener("click", ev => {
+  const go = ev.target.closest("[data-go]");
+  if (go) { haptic("light"); showTab(go.dataset.go, go.dataset.focus); }
+});
+function updateBackButton() {
+  if (!tg || !tg.BackButton) return;
+  if (currentTab === "home") tg.BackButton.hide(); else tg.BackButton.show();
+}
+$("refreshAll").addEventListener("click", async () => {
+  haptic("medium");
+  await Promise.all([loadMt5(), loadMyTrades()]);
+  toast("Données actualisées");
+});
+
+// ---------------------------------------------------------------- accueil : tableau de bord
+function winRing(rate) {
+  const C = 2 * Math.PI * 36;
+  const v = rate === null || rate === undefined ? 0 : Math.max(0, Math.min(100, rate));
+  const wrap = el("div", {class: "ring"});
+  wrap.innerHTML = `<svg viewBox="0 0 84 84"><circle class="bg" cx="42" cy="42" r="36"/><circle class="fg" cx="42" cy="42" r="36" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>`;
+  wrap.append(el("div", {class: "lbl"}, el("b", {class: "num", text: rate === null || rate === undefined ? "—" : rate + "%"}), el("span", {text: "Réussite"})));
+  requestAnimationFrame(() => requestAnimationFrame(() => { wrap.querySelector(".fg").style.strokeDashoffset = C * (1 - v / 100); }));
+  return wrap;
+}
+
+function renderHero() {
+  const st = myStats, acc = mt5acc;
+  const hero = $("hero");
+  if (me === null || mt5acc === undefined || myStats === undefined) return;   // squelette tant que tout n'est pas là
+  const c = st ? st.currency : acc && acc.currency;
+  const balance = st ? st.balance : acc ? acc.balance : null;
+  const main = el("div", {class: "main"},
+    el("div", {class: "eyebrow", text: "Solde du compte"}),
+    el("div", {class: "big num"}, balance === null || balance === undefined ? "—" : fmt2(balance), el("small", {text: cur(c)})));
+  if (st) {
+    main.append(el("div", {class: "sub num"},
+      "En cours : ", el("b", {class: pnlClass(st.floating), text: signed(st.floating, c)}),
+      " · " + (st.open_count ?? (st.open || []).length) + " position(s)"));
+  } else {
+    main.append(el("div", {class: "sub", text: !acc ? "Connecte ton compte MT5 pour démarrer." : "Les résultats arrivent une minute après la connexion."}));
+  }
+  const tile = (v, label) => el("div", {}, el("b", {class: "num " + pnlClass(v), text: st ? signed(v, c) : "—"}), el("span", {text: label}));
+  const foot = el("div", {class: "herofoot"},
+    el("span", {text: st ? "Mis à jour " + ago(st.updated_at) : acc ? "Compte " + acc.login : "Aucun compte connecté"}),
+    st && st.simulation ? badge("Simulation", "wait") : st ? badge("Réel", "ok") : null);
+  hero.replaceChildren(
+    el("div", {class: "herotop"}, main, winRing(st ? st.win_rate_30d : null)),
+    el("div", {class: "divider"}),
+    el("div", {class: "trio"}, tile(st && st.pnl_today, "Aujourd'hui"), tile(st && st.pnl_7d, "7 jours"), tile(st && st.pnl_30d, "30 jours")),
+    foot);
+}
+
+function renderSteps() {
+  if (!me || mt5acc === undefined) return;
+  const admin_ = isAdminUser();
+  const list = [];
+  if (!admin_) list.push({done: !!me.referrer, title: "Code de parrainage", sub: me.referrer ? "Rattaché à " + me.referrer.name : "Entre le code de ton administrateur", go: "codecard"});
+  list.push({done: me.status === "active", title: "Accès activé", sub: me.status === "active" ? "Ton accès est validé" : me.status === "revoked" ? "Accès révoqué" : "En attente de ton administrateur", go: "profilecard"});
+  const mt5ok = mt5acc && mt5acc.status === "connected";
+  list.push({done: mt5ok, title: "Compte MT5 connecté", sub: !mt5acc ? "Connecte ton compte de trading" : mt5ok ? "Compte " + mt5acc.login : mt5acc.status === "error" ? (mt5acc.message || "Problème de connexion") : "Connexion en cours…", go: "mt5card"});
+  list.push({done: me.sources.length > 0, title: "Signaux suivis", sub: me.sources.length ? me.sources.map(s => s.name).join(", ") : "Ton administrateur choisit tes sources", go: "profilecard"});
+  const all = list.every(s => s.done);
+  $("stepsTitle").textContent = all ? "Copie active" : "Ma configuration · " + list.filter(s => s.done).length + "/" + list.length;
+  $("steps").replaceChildren(...list.map(s => {
+    const ck = el("span", {class: "ck"}); if (s.done) ck.append(icon("check", "i"));
+    return el("div", {class: "step" + (s.done ? " done" : ""), "data-go": "account", "data-focus": s.go},
+      ck, el("div", {class: "tx"}, el("b", {text: s.title}), el("span", {text: s.sub})), icon("chev", "i chev"));
+  }));
+}
+
+function tradeRow(p, c, closed) {
+  const buy = p.side === "buy";
+  const detail = closed
+    ? `${date(p.time)} · ${p.volume} lot`
+    : `${p.volume} lot @ ${p.price_open}` + (p.tp ? ` · TP ${p.tp}` : "") + (p.sl ? ` · SL ${p.sl}` : "");
+  return el("div", {class: "trow"},
+    el("div", {class: "side " + (buy ? "buy" : "sell"), text: buy ? "BUY" : "SELL"}),
+    el("div", {class: "tx"}, el("b", {text: p.symbol}), el("span", {text: detail})),
+    el("div", {class: "pl num " + pnlClass(p.profit), text: signed(p.profit, c)}));
+}
+function emptyBox(text, ic = "chart") { return el("div", {class: "empty"}, icon(ic), text); }
+
+function renderHomeOpen() {
+  const box = $("homeOpen");
+  if (myStats === undefined) return;
+  if (!myStats) return box.replaceChildren(emptyBox("Aucune donnée de trading pour l'instant."));
+  const open = myStats.open || [];
+  if (!open.length) return box.replaceChildren(emptyBox("Aucune position ouverte. Elles apparaîtront ici dès le prochain signal.", "clock"));
+  box.replaceChildren(...open.slice(0, 3).map(p => tradeRow(p, myStats.currency, false)));
+}
+
+function renderTrades() {
+  const box = $("tradesList");
+  if (myStats === undefined) return;
+  const st = myStats;
+  if (!st) { box.replaceChildren(emptyBox("Pas encore de données : elles arrivent une minute après la connexion du compte MT5.")); $("tradesFoot").textContent = ""; return; }
+  const items = tradeView === "open" ? (st.open || []) : (st.closed || []);
+  box.replaceChildren(...(items.length ? items.map(p => tradeRow(p, st.currency, tradeView === "closed"))
+    : [emptyBox(tradeView === "open" ? "Aucune position ouverte." : "Aucun trade fermé sur 30 jours.", tradeView === "open" ? "clock" : "chart")]));
+  $("tradesFoot").textContent = "Mis à jour " + ago(st.updated_at) + (st.simulation ? " · mode simulation" : "") +
+    (tradeView === "closed" && st.trades_30d ? ` · ${st.trades_30d} trades · ${st.win_rate_30d ?? "—"} % de réussite` : "");
+}
+document.querySelectorAll("#tradeSeg button").forEach(b => b.addEventListener("click", () => {
+  tradeView = b.dataset.v; haptic("select");
+  document.querySelectorAll("#tradeSeg button").forEach(x => x.classList.toggle("active", x === b));
+  renderTrades();
+}));
+
+function renderHome() { renderHero(); renderSteps(); renderHomeOpen(); renderTrades(); }
+
+// ---------------------------------------------------------------- statistiques (vue admin)
 function statsBlock(st) {
-  if (!st) return el("p", {class: "hint", text: "Pas encore de données de trading (elles arrivent une minute après la connexion du compte MT5)."});
+  if (!st) return el("p", {class: "hint", text: "Pas encore de données de trading."});
   const c = st.currency;
+  const s = (v, label, cls) => el("div", {class: "stat"}, el("b", {class: "num " + (cls || ""), text: v}), el("span", {text: label}));
   return el("div", {},
     el("div", {class: "stats"},
-      el("div", {class: "stat"}, el("b", {text: money(st.balance, c)}), el("span", {text: "Solde"})),
-      el("div", {class: "stat"}, el("b", {class: pnlClass(st.floating), text: signed(st.floating, c)}), el("span", {text: "En cours (" + (st.open_count ?? (st.open || []).length) + ")"})),
-      el("div", {class: "stat"}, el("b", {class: pnlClass(st.pnl_today), text: signed(st.pnl_today, c)}), el("span", {text: "Aujourd'hui"})),
-      el("div", {class: "stat"}, el("b", {class: pnlClass(st.pnl_7d), text: signed(st.pnl_7d, c)}), el("span", {text: "7 jours"})),
-      el("div", {class: "stat"}, el("b", {class: pnlClass(st.pnl_30d), text: signed(st.pnl_30d, c)}), el("span", {text: "30 jours"})),
-      el("div", {class: "stat"}, el("b", {text: st.win_rate_30d === null || st.win_rate_30d === undefined ? "—" : st.win_rate_30d + " %"}), el("span", {text: "Réussite (" + st.trades_30d + " trades)"}))
-    ),
-    el("p", {class: "hint", text: "Mis à jour " + ago(st.updated_at) + (st.simulation ? " · mode simulation" : "")})
-  );
+      s(money(st.balance, c), "Solde"),
+      s(signed(st.floating, c), "En cours (" + (st.open_count ?? (st.open || []).length) + ")", pnlClass(st.floating)),
+      s(signed(st.pnl_today, c), "Aujourd'hui", pnlClass(st.pnl_today)),
+      s(signed(st.pnl_7d, c), "7 jours", pnlClass(st.pnl_7d)),
+      s(signed(st.pnl_30d, c), "30 jours", pnlClass(st.pnl_30d)),
+      s(st.win_rate_30d === null || st.win_rate_30d === undefined ? "—" : st.win_rate_30d + " %", "Réussite (" + st.trades_30d + ")")),
+    el("p", {class: "hint", text: "Mis à jour " + ago(st.updated_at) + (st.simulation ? " · simulation" : "")}));
 }
-
 function tradesList(st) {
-  if (!st) return el("p", {class: "hint", text: "Aucune donnée."});
+  if (!st) return emptyBox("Aucune donnée.");
   const c = st.currency;
   const box = el("div", {});
-  box.append(el("h3", {text: "Positions ouvertes"}));
-  if (!(st.open || []).length) box.append(el("p", {class: "hint", text: "Aucune."}));
-  for (const p of st.open || []) {
-    box.append(el("div", {class: "trade"},
-      el("span", {text: `${p.side === "buy" ? "ACHAT" : "VENTE"} ${p.volume} ${p.symbol} @ ${p.price_open}` + (p.tp ? ` · TP ${p.tp}` : "") + (p.sl ? ` · SL ${p.sl}` : "")}),
-      el("b", {class: pnlClass(p.profit), text: signed(p.profit, c)})));
-  }
-  box.append(el("h3", {text: "Trades fermés (30 jours)", style: "margin-top:12px"}));
-  if (!(st.closed || []).length) box.append(el("p", {class: "hint", text: "Aucun."}));
-  for (const t of st.closed || []) {
-    box.append(el("div", {class: "trade"},
-      el("span", {text: `${date(t.time)} · ${t.side === "buy" ? "ACHAT" : "VENTE"} ${t.volume} ${t.symbol}`}),
-      el("b", {class: pnlClass(t.profit), text: signed(t.profit, c)})));
-  }
+  box.append(el("h4", {text: "Positions ouvertes"}));
+  box.append(...((st.open || []).length ? st.open.map(p => tradeRow(p, c, false)) : [emptyBox("Aucune.", "clock")]));
+  box.append(el("h4", {text: "Trades fermés (30 jours)"}));
+  box.append(...((st.closed || []).length ? st.closed.map(t => tradeRow(t, c, true)) : [emptyBox("Aucun.")]));
   return box;
 }
-
-// ---------------------------------------------------------------- onglets
-document.querySelectorAll("#tabs button").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("active", x === b));
-  $("tab-home").classList.toggle("hidden", b.dataset.tab !== "home");
-  $("tab-admin").classList.toggle("hidden", b.dataset.tab !== "admin");
-  if (b.dataset.tab === "admin") loadAdmin();
-}));
 
 // ---------------------------------------------------------------- mon compte
 async function loadAccount() {
   const box = $("account");
   if (!tg || !tg.initData) {
-    setBadge($("badge"), "Hors Telegram", "err");
+    setPill("Hors Telegram", "err");
     message(box, "Ouvre cette page depuis le bouton Menu du bot Telegram.");
+    $("hero").replaceChildren(el("div", {class: "eyebrow", text: "Hors Telegram"}), el("p", {text: "Ouvre l'application depuis le bouton Menu du bot @AscendCopyBot."}));
+    $("steps").replaceChildren(); $("homeOpen").replaceChildren(emptyBox("—"));
     return;
   }
   try { me = await api("/me"); }
   catch (e) {
-    setBadge($("badge"), e.status ? "Accès refusé" : "API injoignable", "err");
-    message(box, e.status ? e.message : "Impossible de joindre le serveur. Le PC, l'API et le tunnel sont-ils allumés ?");
+    setPill(e.status ? "Accès refusé" : "Hors ligne", "err");
+    const txt = e.status ? e.message : "Impossible de joindre le serveur. Le PC, l'API et le tunnel sont-ils allumés ?";
+    message(box, txt);
+    $("hero").replaceChildren(el("div", {class: "eyebrow", text: e.status ? "Accès refusé" : "Serveur injoignable"}), el("p", {text: txt}),
+      el("button", {class: "btn", text: "Réessayer", onclick: () => location.reload()}));
+    $("steps").replaceChildren(); $("homeOpen").replaceChildren(emptyBox("—"));
+    haptic("error");
     return;
   }
   renderMe();
@@ -292,23 +688,24 @@ async function loadAccount() {
 }
 
 function renderMe() {
-  setBadge($("badge"), "Connecté", "ok");
-  const isAdmin = me.role === "admin" || me.role === "super_admin";
+  setPill("En ligne", "ok");
+  const isAdmin = isAdminUser();
   const list = [["Rôle", LABELS.role[me.role] || me.role], ["Statut", LABELS.status[me.status] || me.status]];
   if (!isAdmin) list.push(["Administrateur", me.referrer ? me.referrer.name : "aucun (entre ton code)"]);
   list.push(["Signaux suivis", me.sources.length ? me.sources.map(s => s.name).join(", ") : "aucun"]);
   rows($("account"), list);
   $("codecard").classList.toggle("hidden", isAdmin || !!me.referrer);
-  if (isAdmin && me.status === "active") $("tabs").classList.remove("hidden");
+  if (isAdmin && me.status === "active") $("navAdmin").classList.remove("hidden");
+  renderSteps();
 }
 
 $("codeform").addEventListener("submit", async ev => {
   ev.preventDefault();
   try {
-    me = await post("/referral", {code: $("codeinput").value});
-    renderMe();
-    toast("Code validé : tu es rattaché à " + me.referrer.name + ". Il doit maintenant activer ton accès.");
-  } catch (e) { toast(e.message); }
+    me = await post("/referral", {code: $("codeinput").value.trim().toUpperCase()});
+    renderMe(); renderMt5(mt5acc);
+    toast("Code validé : tu es rattaché à " + me.referrer.name + ". Il doit maintenant activer ton accès.", "good");
+  } catch (e) { toast(e.message, "bad"); }
 });
 
 function showForm(show) {
@@ -319,6 +716,7 @@ function showForm(show) {
 
 function renderMt5(acc) {
   clearTimeout(pollTimer);
+  mt5acc = acc || null;
   const info = $("mt5info");
   if (!acc) {
     setBadge($("mt5badge"), "Non connecté", "");
@@ -328,9 +726,8 @@ function renderMt5(acc) {
         ? "Ton accès doit d'abord être activé par ton administrateur avant de connecter un compte MT5."
         : "Entre d'abord le code de parrainage de ton administrateur.");
       ["mt5form", "mt5change", "mt5remove"].forEach(id => $(id).classList.add("hidden"));
-      return;
-    }
-    showForm(true);
+    } else showForm(true);
+    renderHome();
     return;
   }
   showForm(false);
@@ -339,41 +736,42 @@ function renderMt5(acc) {
   list.push(["Lot par TP", String(acc.lot_per_tp)]);
   if (acc.message) list.push(["État", acc.message]);
   rows(info, list);
-  if (acc.status === "connected") setBadge($("mt5badge"), "Compte connecté", "ok");
-  else if (acc.status === "error") setBadge($("mt5badge"), "Problème de connexion", "err");
-  else setBadge($("mt5badge"), "Connexion en cours…", "wait");
+  if (acc.status === "connected") setBadge($("mt5badge"), "Connecté", "ok");
+  else if (acc.status === "error") setBadge($("mt5badge"), "Problème", "err");
+  else setBadge($("mt5badge"), "Connexion…", "wait");
   pollTimer = setTimeout(loadMt5, acc.status === "pending" ? 4000 : 30000);
+  renderHome();
 }
 
 async function loadMt5() {
   try { renderMt5((await api("/mt5")).account); }
-  catch (e) { setBadge($("mt5badge"), "Erreur", "err"); message($("mt5info"), e.message); }
+  catch (e) { setBadge($("mt5badge"), "Erreur", "err"); message($("mt5info"), e.message); if (mt5acc === undefined) { mt5acc = null; renderHome(); } }
 }
 
 async function loadMyTrades() {
-  try {
-    const {stats} = await api("/my/trades");
-    if (!stats) return;
-    $("mytrades").classList.remove("hidden");
-    $("mytradesbody").replaceChildren(statsBlock(stats), el("div", {class: "panel"}, tradesList(stats)));
-  } catch (e) {}
+  clearTimeout(tradesTimer);
+  try { myStats = (await api("/my/trades")).stats || null; }
+  catch (e) { if (myStats === undefined) myStats = null; }
+  renderHome();
+  tradesTimer = setTimeout(loadMyTrades, 60000);
 }
 
 $("mt5form").addEventListener("submit", async ev => {
   ev.preventDefault();
   const btn = $("mt5submit");
-  btn.disabled = true; btn.textContent = "Envoi…";
+  btn.disabled = true; btn.replaceChildren(el("span", {class: "spin"}), "Connexion…");
   try {
     const data = await post("/mt5", {login: Number($("login").value.trim()), password: $("password").value, server: $("server").value.trim()});
     $("password").value = "";
     renderMt5(data.account);
-  } catch (e) { toast(e.message); }
+    toast("Compte envoyé : MT5 démarre, patiente quelques secondes.", "good");
+  } catch (e) { toast(e.message, "bad"); }
   finally { btn.disabled = false; btn.textContent = "Connecter mon compte"; }
 });
-$("mt5change").addEventListener("click", () => { clearTimeout(pollTimer); showForm(true); });
+$("mt5change").addEventListener("click", () => { haptic("light"); clearTimeout(pollTimer); showForm(true); });
 $("mt5remove").addEventListener("click", async () => {
   if (!await confirmBox("Déconnecter ce compte MT5 ? La copie des signaux s'arrêtera.")) return;
-  try { await api("/mt5", {method: "DELETE"}); renderMt5(null); } catch (e) { toast(e.message); }
+  try { await api("/mt5", {method: "DELETE"}); renderMt5(null); toast("Compte déconnecté"); } catch (e) { toast(e.message, "bad"); }
 });
 
 // ---------------------------------------------------------------- administration
@@ -388,14 +786,15 @@ async function loadAdmin() {
   }
   if (admin.me.is_owner) { renderCopy(admin.copy); loadSources(); }
   renderUsers();
-  adminTimer = setTimeout(() => { if (!$("tab-admin").classList.contains("hidden")) loadAdmin(); }, 30000);
+  adminTimer = setTimeout(() => { if (currentTab === "admin") loadAdmin(); }, 30000);
 }
 
 $("copycode").addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText(admin.me.code); toast("Code copié"); }
+  try { await navigator.clipboard.writeText(admin.me.code); toast("Code copié", "good"); }
   catch (e) { toast("Code : " + admin.me.code); }
 });
 $("sharecode").addEventListener("click", () => {
+  haptic("light");
   const text = `Rejoins Copy Trading : ouvre ${BOT_LINK}, envoie /start, puis ouvre l'application et entre mon code de parrainage : ${admin.me.code}`;
   const url = "https://t.me/share/url?url=" + encodeURIComponent(BOT_LINK) + "&text=" + encodeURIComponent(text);
   if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url);
@@ -403,27 +802,27 @@ $("sharecode").addEventListener("click", () => {
 
 function renderCopy(c) {
   $("copycard").classList.remove("hidden");
-  rows($("services"), [
-    ["Lecture des canaux", c.listener_alive ? "✅ en marche" : "❌ arrêtée"],
-    ["Copie MT5 des clients", c.manager_alive ? "✅ en marche" : "❌ arrêtée"]
-  ]);
+  $("services").replaceChildren(
+    el("div", {class: "row"}, el("span", {text: "Lecture des canaux"}), el("span", {}, badge(c.listener_alive ? "En marche" : "Arrêtée", c.listener_alive ? "ok" : "err"))),
+    el("div", {class: "row"}, el("span", {text: "Copie MT5 des clients"}), el("span", {}, badge(c.manager_alive ? "En marche" : "Arrêtée", c.manager_alive ? "ok" : "err"))));
   $("modeText").textContent = c.dry_run ? "Simulation : aucun ordre réel n'est envoyé" : "RÉEL : les ordres sont envoyés aux comptes des clients";
   $("modeBtn").textContent = c.dry_run ? "Passer en réel" : "Passer en simulation";
-  $("modeBtn").className = "small " + (c.dry_run ? "danger" : "");
+  $("modeBtn").className = "btn sm " + (c.dry_run ? "danger" : "ghost");
   $("stopText").textContent = c.stop ? "ACTIVÉ : aucune nouvelle position n'est ouverte" : "Désactivé";
   $("stopBtn").textContent = c.stop ? "Reprendre" : "Tout bloquer";
-  $("stopBtn").className = "small " + (c.stop ? "" : "danger");
+  $("stopBtn").className = "btn sm " + (c.stop ? "" : "danger");
 }
 $("modeBtn").addEventListener("click", async () => {
   const toReal = admin.copy.dry_run;
   if (toReal && !await confirmBox("Passer en mode RÉEL ? Les signaux ouvriront de vraies positions sur les comptes de tous les clients connectés.")) return;
-  try { admin = await post("/admin/copy", {dry_run: !toReal}); renderCopy(admin.copy); toast(toReal ? "Mode réel activé" : "Mode simulation activé"); }
-  catch (e) { toast(e.message); }
+  try { admin = await post("/admin/copy", {dry_run: !toReal}); renderCopy(admin.copy); toast(toReal ? "Mode réel activé" : "Mode simulation activé", "good"); }
+  catch (e) { toast(e.message, "bad"); }
 });
 $("stopBtn").addEventListener("click", async () => {
   const stop = !admin.copy.stop;
-  try { admin = await post("/admin/copy", {stop}); renderCopy(admin.copy); toast(stop ? "Arrêt d'urgence activé" : "Copie reprise"); }
-  catch (e) { toast(e.message); }
+  if (stop && !await confirmBox("Activer l'arrêt d'urgence ? Aucune nouvelle position ne sera ouverte.")) return;
+  try { admin = await post("/admin/copy", {stop}); renderCopy(admin.copy); toast(stop ? "Arrêt d'urgence activé" : "Copie reprise", stop ? "bad" : "good"); }
+  catch (e) { toast(e.message, "bad"); }
 });
 
 // ---------------------------------------------------------------- sources (propriétaire)
@@ -434,16 +833,16 @@ async function loadSources() {
 }
 
 async function updateSource(id, body, okText) {
-  try { sourcesData = await post("/admin/sources/" + id, body); renderSources(); toast(okText); loadAdmin(); }
-  catch (e) { toast(e.message); renderSources(); }
+  try { sourcesData = await post("/admin/sources/" + id, body); renderSources(); toast(okText, "good"); loadAdmin(); }
+  catch (e) { toast(e.message, "bad"); renderSources(); }
 }
 
 function renderSources() {
   const box = $("sources");
   box.replaceChildren();
   const d = sourcesData;
-  if (!d.listener_alive) box.append(el("p", {text: "⚠️ La lecture des canaux est arrêtée sur le PC (copier.run_all)."}));
-  if (!d.dialogs.length) box.append(el("p", {class: "hint", text: "Liste de tes canaux pas encore reçue : appuie sur « Actualiser les canaux » puis patiente 10 secondes."}));
+  if (!d.listener_alive) box.append(el("p", {class: "neg", text: "La lecture des canaux est arrêtée sur le PC (copier.run_all)."}));
+  if (!d.dialogs.length) box.append(el("p", {class: "hint", text: "Liste de tes canaux pas encore reçue : appuie sur « Actualiser » puis patiente 10 secondes."}));
   if (!d.sources.length) box.append(el("p", {text: "Aucune source pour l'instant : ajoute-en une ci-dessous."}));
   for (const s of d.sources) {
     const name = el("input", {value: s.name, maxlength: "60"});
@@ -464,7 +863,7 @@ function renderSources() {
     for (const a of admin.admins.filter(a => a.role === "admin")) {
       const cb = el("input", {type: "checkbox", checked: s.admin_ids.includes(a.telegram_id)});
       cb.addEventListener("change", () => {
-        const ids = [...checks.querySelectorAll("input")].map((x, i) => x.checked ? x.dataset.id : null).filter(Boolean).map(Number);
+        const ids = [...checks.querySelectorAll("input")].filter(x => x.checked).map(x => Number(x.dataset.id));
         updateSource(s.id, {admin_ids: ids}, "Administrateurs mis à jour");
       });
       cb.dataset.id = a.telegram_id;
@@ -474,16 +873,16 @@ function renderSources() {
     const ls = s.last_signal;
     box.append(el("div", {class: "item"},
       el("div", {class: "head"},
-        el("div", {style: "flex:1"}, el("label", {text: "Nom de la source", style: "margin-top:0"}), name),
-        badge(s.chat ? "écoutée" : "sans canal", s.chat ? "ok" : "wait")),
-      el("button", {class: "small secondary", style: "margin-top:8px", text: "Renommer", onclick: () => updateSource(s.id, {name: name.value}, "Source renommée")}),
+        el("div", {style: "flex:1"}, el("label", {text: "Nom de la source", style: "margin-top:0"}),
+          el("div", {class: "toolbar", style: "margin-top:0"}, name, el("button", {class: "btn sm ghost", text: "Renommer", onclick: () => updateSource(s.id, {name: name.value}, "Source renommée")}))),
+        badge(s.chat ? "Écoutée" : "Sans canal", s.chat ? "ok" : "wait")),
       el("label", {text: "Canal Telegram écouté"}), select,
-      el("label", {text: "Administrateurs qui peuvent la donner à leurs clients"}), checks,
-      el("p", {class: "hint", text: `${s.clients} client(s) la suivent · dernier signal : ${ls ? ago(ls.at) + " — « " + ls.text.replace(/\s+/g, " ") + " »" : "jamais"}`}),
-      el("button", {class: "small danger", text: "Supprimer cette source", onclick: async () => {
+      el("label", {text: "Admins autorisés"}), checks,
+      el("p", {class: "hint", text: `${s.clients} client(s) · dernier signal : ${ls ? ago(ls.at) + " — « " + ls.text.replace(/\s+/g, " ") + " »" : "jamais"}`}),
+      el("button", {class: "btn sm danger", style: "margin-top:6px", text: "Supprimer la source", onclick: async () => {
         if (!await confirmBox(`Supprimer la source « ${s.name} » ? Ses ${s.clients} client(s) ne recevront plus ses signaux.`)) return;
         try { sourcesData = await api("/admin/sources/" + s.id, {method: "DELETE"}); renderSources(); toast("Source supprimée"); loadAdmin(); }
-        catch (e) { toast(e.message); }
+        catch (e) { toast(e.message, "bad"); }
       }})
     ));
   }
@@ -491,13 +890,13 @@ function renderSources() {
 
 $("addsource").addEventListener("click", async () => {
   const name = $("newsource").value.trim();
-  if (!name) return toast("Donne un nom à la source");
-  try { sourcesData = await post("/admin/sources", {name}); $("newsource").value = ""; renderSources(); toast("Source ajoutée : choisis maintenant son canal"); loadAdmin(); }
-  catch (e) { toast(e.message); }
+  if (!name) return toast("Donne un nom à la source", "bad");
+  try { sourcesData = await post("/admin/sources", {name}); $("newsource").value = ""; renderSources(); toast("Source ajoutée : choisis maintenant son canal", "good"); loadAdmin(); }
+  catch (e) { toast(e.message, "bad"); }
 });
 $("refreshDialogs").addEventListener("click", async () => {
   try { await post("/admin/sources/refresh-channels"); toast("Actualisation demandée…"); setTimeout(loadSources, 8000); }
-  catch (e) { toast(e.message); }
+  catch (e) { toast(e.message, "bad"); }
 });
 
 // ---------------------------------------------------------------- utilisateurs
@@ -507,7 +906,9 @@ function renderUsers() {
   const all = admin.users;
   const counts = {pending: 0, active: 0, mt5: 0};
   all.forEach(u => { if (u.status === "pending") counts.pending++; if (u.status === "active") counts.active++; if (u.mt5 && u.mt5.status === "connected") counts.mt5++; });
-  $("userStats").textContent = `${all.length} personne(s) · ${counts.active} active(s) · ${counts.pending} en attente · ${counts.mt5} compte(s) MT5 connecté(s)`;
+  $("userStats").textContent = `${all.length} personne(s) · ${counts.active} active(s) · ${counts.pending} en attente · ${counts.mt5} MT5 connecté(s)`;
+  $("pendingBadge").textContent = counts.pending;
+  $("pendingBadge").classList.toggle("hidden", !counts.pending);
   const list = all.filter(u => {
     if (f === "admins" && !(u.role === "admin" || u.role === "super_admin")) return false;
     if (f === "noadmin" && (u.referrer || u.role !== "user")) return false;
@@ -518,7 +919,7 @@ function renderUsers() {
   const box = $("users");
   box.replaceChildren();
   if (!list.length) {
-    box.append(el("p", {text: admin.me.is_owner ? "Aucun utilisateur." : "Aucun client pour l'instant : partage ton code de parrainage."}));
+    box.append(emptyBox(admin.me.is_owner ? "Aucun utilisateur." : "Aucun client pour l'instant : partage ton code de parrainage."));
     return;
   }
   for (const u of list) box.append(userCard(u));
@@ -542,8 +943,8 @@ function userCard(u) {
         el("div", {class: "muted", text: (u.username ? "@" + u.username + " · " : "") + "ID " + u.telegram_id})),
       badge(LABELS.status[u.status] || u.status, STATUS_CLASS[u.status])),
     el("div", {class: "badges"},
-      badge(LABELS.role[u.role] || u.role, u.role === "user" ? "" : "blue"),
-      owner && u.role === "user" ? badge(u.referrer ? "Admin : " + u.referrer.name : "Sans admin", u.referrer ? "" : "wait") : null,
+      badge(LABELS.role[u.role] || u.role, (u.role === "user" ? "" : "blue") + " nodot"),
+      owner && u.role === "user" ? badge(u.referrer ? "Admin : " + u.referrer.name : "Sans admin", (u.referrer ? "" : "wait") + " nodot") : null,
       badge(mt5Text, !mt5 ? "" : mt5.status === "connected" ? "ok" : mt5.status === "error" ? "err" : "wait"))
   );
   if (u.stats) card.append(statsBlock(u.stats));
@@ -558,7 +959,6 @@ function userCard(u) {
   }
   if (grid.children.length) card.append(grid);
 
-  // Sources suivies
   const grantable = admin.grantable_sources;
   if (grantable.length && (u.role === "user" || owner)) {
     const mine = new Set(u.sources.map(s => s.id));
@@ -567,9 +967,10 @@ function userCard(u) {
       const cb = el("input", {type: "checkbox", checked: mine.has(s.id)});
       cb.dataset.id = s.id;
       cb.addEventListener("change", async () => {
+        haptic("select");
         const ids = [...checks.querySelectorAll("input")].filter(x => x.checked).map(x => Number(x.dataset.id));
-        try { await post(`/admin/users/${u.telegram_id}/sources`, {source_ids: ids}); toast("Sources mises à jour"); await loadAdmin(); if (isMe) loadAccount(); }
-        catch (e) { toast(e.message); cb.checked = !cb.checked; }
+        try { await post(`/admin/users/${u.telegram_id}/sources`, {source_ids: ids}); toast("Sources mises à jour", "good"); await loadAdmin(); if (isMe) loadAccount(); }
+        catch (e) { toast(e.message, "bad"); cb.checked = !cb.checked; }
       });
       checks.append(el("label", {class: "check"}, cb, s.name));
     }
@@ -578,17 +979,17 @@ function userCard(u) {
     card.append(el("p", {class: "hint", text: "Signaux suivis : " + u.sources.map(s => s.name).join(", ")}));
   }
 
-  // Trades détaillés
   const panel = el("div", {class: "panel hidden"});
-  const btn = el("button", {class: "secondary", text: "Voir les trades"});
+  const btn = el("button", {class: "btn ghost", style: "min-height:42px;margin-top:12px", text: "Voir les trades"});
   btn.addEventListener("click", async () => {
+    haptic("light");
     if (!panel.classList.contains("hidden")) { panel.classList.add("hidden"); btn.textContent = "Voir les trades"; openPanels.delete(u.telegram_id); return; }
     btn.textContent = "Chargement…";
     try {
       const {stats} = await api(`/admin/users/${u.telegram_id}/trades`);
       panel.replaceChildren(tradesList(stats));
       panel.classList.remove("hidden"); btn.textContent = "Masquer les trades"; openPanels.add(u.telegram_id);
-    } catch (e) { toast(e.message); btn.textContent = "Voir les trades"; }
+    } catch (e) { toast(e.message, "bad"); btn.textContent = "Voir les trades"; }
   });
   if (u.stats) card.append(btn, panel);
   return card;
@@ -601,7 +1002,7 @@ function selectField(label, value, values, labels, onChange) {
     const v = select.value;
     select.disabled = true;
     try { if (await onChange(v) === false) select.value = value; }
-    catch (e) { toast(e.message); select.value = value; }
+    catch (e) { toast(e.message, "bad"); select.value = value; }
     finally { select.disabled = false; }
   });
   return el("div", {}, el("label", {text: label}), select);
@@ -610,26 +1011,32 @@ function selectField(label, value, values, labels, onChange) {
 async function changeStatus(u, v) {
   if (v === "revoked" && !await confirmBox(`Révoquer ${u.full_name} ? Son compte MT5 sera déconnecté et la copie arrêtée.`)) return false;
   await post(`/admin/users/${u.telegram_id}/status`, {status: v});
-  toast("Statut enregistré"); await loadAdmin();
+  toast("Statut enregistré", "good"); await loadAdmin();
 }
 async function changeRole(u, v) {
   if (v === "admin" && !await confirmBox(`Nommer ${u.full_name} administrateur ? Un code de parrainage lui sera créé et envoyé.`)) return false;
   await post(`/admin/users/${u.telegram_id}/role`, {role: v});
-  toast(v === "admin" ? "Administrateur nommé, son code lui a été envoyé" : "Rôle retiré"); await loadAdmin();
+  toast(v === "admin" ? "Administrateur nommé, son code lui a été envoyé" : "Rôle retiré", "good"); await loadAdmin();
 }
 async function changeReferrer(u, v) {
   await post(`/admin/users/${u.telegram_id}/referrer`, {admin_id: v ? Number(v) : null});
-  toast("Administrateur du client modifié"); await loadAdmin();
+  toast("Administrateur du client modifié", "good"); await loadAdmin();
 }
 
 // ---------------------------------------------------------------- démarrage
+const h = new Date().getHours();
+$("greet").textContent = (h >= 18 || h < 5 ? "Bonsoir" : "Bonjour") + ",";
 if (tg) {
   tg.ready();
   tg.expand();
-  if (tg.initDataUnsafe && tg.initDataUnsafe.user) $("hello").textContent = "Bonjour " + tg.initDataUnsafe.user.first_name + " 👋";
-  $("close").addEventListener("click", () => tg.close());
-} else {
-  $("close").textContent = "Page de test";
+  try { tg.setHeaderColor("#060504"); tg.setBackgroundColor("#060504"); if (tg.setBottomBarColor) tg.setBottomBarColor("#080706"); } catch (e) {}
+  try { if (tg.disableVerticalSwipes) tg.disableVerticalSwipes(); } catch (e) {}
+  if (tg.BackButton) tg.BackButton.onClick(() => showTab("home"));
+  const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+  if (u) {
+    $("hello").textContent = u.first_name;
+    $("avatar").textContent = ((u.first_name || "")[0] || "") + ((u.last_name || "")[0] || "");
+  }
 }
 loadAccount();
 </script>
