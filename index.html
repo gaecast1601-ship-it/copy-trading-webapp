@@ -173,6 +173,13 @@ select option{background:var(--panel)}
 .toolbar{display:flex;gap:8px;align-items:center;margin-top:12px}
 .toolbar input{flex:1}
 .toolbar select{width:auto;flex:none}
+.checkrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;font-size:14px;color:var(--cream);text-transform:none;letter-spacing:0;font-weight:500}
+.checkrow input{width:22px;height:22px;flex:none;accent-color:var(--gold)}
+.lotrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.lotrow:last-child{border-bottom:0}
+.lotrow span{flex:1;min-width:0;font-size:14px}
+.lotrow input{width:96px;flex:none;margin:0}
+.lotrow .btn{flex:none}
 .switch{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
 .switch:last-child{border-bottom:0}
 .switch h3{margin:0 0 2px;font-size:15px;font-weight:600}
@@ -326,6 +333,17 @@ select option{background:var(--panel)}
     </div>
   </section>
 
+  <section class="card hidden" id="lotcard">
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h6"/></svg>Taille des positions</h2>
+    <p class="hint">Lot ouvert pour chaque TP d'un signal. Exemple : un signal avec 3 TP et un lot de 0.02 ouvre 3 positions de 0.02.</p>
+    <label for="lotTp">Lot par TP (tous les canaux)</label>
+    <div class="toolbar" style="margin-top:0">
+      <input id="lotTp" inputmode="decimal" placeholder="0.01 (par défaut)">
+      <button class="btn sm" id="saveLot">Enregistrer</button>
+    </div>
+    <div id="lotSources"></div>
+  </section>
+
   <section class="card" id="profilecard">
     <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Mon profil</h2>
     <div id="account" class="rows"><span class="skel" style="height:14px;margin:14px 0"></span><span class="skel" style="height:14px;margin:14px 0;width:70%"></span></div>
@@ -347,6 +365,21 @@ select option{background:var(--panel)}
       <button class="btn ghost" id="copycode"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>Copier</button>
       <button class="btn" id="sharecode"><svg class="i" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Partager</button>
     </div>
+  </section>
+
+  <section class="card" id="mychancard">
+    <div class="cardhead">
+      <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/></svg>Mes canaux</h2>
+      <button class="btn sm ghost" id="refreshMyChan">Actualiser</button>
+    </div>
+    <p class="hint">Les canaux Telegram dont tes clients copient les signaux. Colle le lien de ton canal : le bot le rejoint tout seul en quelques secondes. Pour un canal privé, utilise un lien d'invitation (t.me/+…).</p>
+    <div id="mychannels"><span class="skel" style="height:50px;margin-top:12px;border-radius:12px"></span></div>
+    <label for="chanLink">Lien du canal</label>
+    <input id="chanLink" placeholder="https://t.me/+AbCdEf… ou @moncanal" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="200">
+    <label for="chanName">Nom affiché à tes clients (facultatif)</label>
+    <input id="chanName" placeholder="Ex. Gold VIP" maxlength="60">
+    <label class="checkrow"><span>L'activer tout de suite pour tous mes clients</span><input type="checkbox" id="chanForClients" checked></label>
+    <button class="btn" id="addMyChan">Ajouter le canal</button>
   </section>
 
   <section class="card hidden" id="copycard">
@@ -402,7 +435,16 @@ select option{background:var(--panel)}
 
 <script>
 // Adresse du tunnel : à mettre à jour à chaque nouveau lancement de cloudflared
-const API_URL = "https://heating-gourmet-herself-aqua.trycloudflare.com";
+// Adresse de l'API : donnée par le bouton Menu du bot (?api=...), mise à jour à chaque lancement par LANCER_BOT.bat.
+// La valeur écrite ici ne sert que de secours si le bouton n'a pas encore été mis à jour.
+const API_URL = (() => {
+  const fallback = "https://accent-ports-electron-networking.trycloudflare.com";
+  try {
+    const v = new URLSearchParams(location.search).get("api");
+    if (v && /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/i.test(v)) return v;
+  } catch (e) {}
+  return fallback;
+})();
 const BOT_LINK = "https://t.me/AscendCopyBot";
 
 const LABELS = {
@@ -684,6 +726,7 @@ async function loadAccount() {
   renderMe();
   $("mt5card").classList.remove("hidden");
   loadMt5();
+  loadLot();
   loadMyTrades();
 }
 
@@ -774,6 +817,117 @@ $("mt5remove").addEventListener("click", async () => {
   try { await api("/mt5", {method: "DELETE"}); renderMt5(null); toast("Compte déconnecté"); } catch (e) { toast(e.message, "bad"); }
 });
 
+// ---------------------------------------------------------------- taille des positions (lot choisi par l'utilisateur)
+const parseNum = v => { const n = parseFloat(String(v).replace(",", ".").replace(/\s/g, "")); return isFinite(n) ? n : null; };
+function spinBtn(btn, on, label) {
+  if (on) { btn.dataset.label = btn.textContent; btn.disabled = true; btn.replaceChildren(el("span", {class: "spin"}), label || "…"); }
+  else { btn.disabled = false; btn.textContent = btn.dataset.label || label || ""; }
+}
+let lotData = null;
+async function loadLot() {
+  if (!me || me.status !== "active") { $("lotcard").classList.add("hidden"); return; }
+  try { lotData = await api("/my/overview"); renderLot(); }
+  catch (e) { $("lotcard").classList.add("hidden"); }
+}
+function renderLot() {
+  $("lotcard").classList.remove("hidden");
+  const st = lotData.settings || {};
+  const def = (lotData.mt5 && lotData.mt5.lot_per_tp) || 0.01;
+  $("lotTp").value = st.lot_per_tp ?? "";
+  $("lotTp").placeholder = def + " (par défaut)";
+  const box = $("lotSources");
+  box.replaceChildren();
+  const copied = (lotData.sources || []).filter(s => s.copied);
+  if (!copied.length) return;
+  box.append(el("label", {text: "Lot par TP pour un canal précis (facultatif)"}));
+  for (const src of copied) {
+    const inp = el("input", {inputmode: "decimal", placeholder: String(st.lot_per_tp ?? def), value: src.lot_per_tp ? String(src.lot_per_tp) : ""});
+    const save = el("button", {class: "btn sm", text: "OK", onclick: async ev => {
+      const v = inp.value.trim();
+      if (v && !(parseNum(v) >= 0.01)) return toast("Lot minimum : 0.01", "bad");
+      const btn = ev.currentTarget; spinBtn(btn, true);
+      try {
+        lotData = await post("/my/sources/" + src.id, v ? {lot_per_tp: parseNum(v)} : {clear_lot: true});
+        renderLot(); toast(v ? `Lot ${parseNum(v)} pour ${src.name}` : `${src.name} : lot général`, "good");
+      } catch (e) { toast(e.message, "bad"); spinBtn(btn, false, "OK"); }
+    }});
+    box.append(el("div", {class: "lotrow"}, el("span", {text: src.name}), inp, save));
+  }
+  box.append(el("p", {class: "hint", text: "Laisse vide pour utiliser le lot général."}));
+}
+$("saveLot").addEventListener("click", async ev => {
+  const v = $("lotTp").value.trim();
+  if (v && !(parseNum(v) >= 0.01)) return toast("Lot minimum : 0.01", "bad");
+  if (v && parseNum(v) > 5) return toast("Lot maximum : 5 par TP", "bad");
+  const btn = ev.currentTarget; spinBtn(btn, true);
+  try {
+    lotData = await post("/my/settings", v ? {lot_per_tp: parseNum(v)} : {clear_lot: true});
+    renderLot(); toast(v ? "Lot enregistré : " + parseNum(v) + " par TP" : "Lot par défaut rétabli", "good");
+  } catch (e) { toast(e.message, "bad"); }
+  finally { spinBtn(btn, false, "Enregistrer"); }
+});
+
+// ---------------------------------------------------------------- mes canaux (chaque admin)
+let myChanTimer = null;
+const JOIN_LABEL = {ok: ["Écouté", "ok"], pending: ["Connexion…", "wait"], waiting: ["En attente d'acceptation", "wait"], error: ["Erreur", "err"]};
+async function loadMyChannels() {
+  clearTimeout(myChanTimer);
+  try { renderMyChannels(await api("/admin/my-channels")); }
+  catch (e) { message($("mychannels"), e.status === 404 ? "Mets à jour le serveur (bot/api.py) pour utiliser cette fonction." : e.message); }
+}
+function renderMyChannels(d) {
+  const box = $("mychannels");
+  box.replaceChildren();
+  if (!d.listener_alive) box.append(el("p", {class: "neg", text: "La lecture des canaux est arrêtée sur le PC : les nouveaux canaux seront rejoints dès qu'elle redémarre."}));
+  if (!d.channels.length) box.append(el("p", {class: "hint", style: "margin-top:12px", text: "Aucun canal pour l'instant : ajoute le tien ci-dessous."}));
+  let pending = false;
+  for (const c of d.channels) {
+    const st = c.listened ? "ok" : (c.status || "pending");
+    if (st === "pending") pending = true;
+    const [label, cls] = JOIN_LABEL[st] || JOIN_LABEL.pending;
+    const name = el("input", {value: c.name, maxlength: "60"});
+    const acts = el("div", {class: "btnrow"});
+    if (c.mine) acts.append(el("button", {class: "btn ghost", text: "Renommer", onclick: async ev => {
+      const btn = ev.currentTarget; spinBtn(btn, true);
+      try { renderMyChannels(await post(`/admin/my-channels/${c.id}/rename`, {name: name.value})); toast("Canal renommé", "good"); }
+      catch (e) { toast(e.message, "bad"); spinBtn(btn, false, "Renommer"); }
+    }}));
+    if (c.mine && (st === "error" || st === "waiting")) acts.append(el("button", {class: "btn ghost", text: "Réessayer", onclick: async () => {
+      try { renderMyChannels(await post(`/admin/my-channels/${c.id}/retry`)); toast("Nouvel essai en cours…"); }
+      catch (e) { toast(e.message, "bad"); }
+    }}));
+    acts.append(el("button", {class: "btn danger", text: "Retirer", onclick: async () => {
+      if (!await confirmBox(`Retirer le canal « ${c.name} » ? Tes ${c.clients} client(s) ne copieront plus ses signaux. Leurs positions déjà ouvertes restent ouvertes.`)) return;
+      try { renderMyChannels(await api(`/admin/my-channels/${c.id}`, {method: "DELETE"})); toast("Canal retiré"); }
+      catch (e) { toast(e.message, "bad"); }
+    }}));
+    const ls = c.last_signal;
+    box.append(el("div", {class: "item"},
+      el("div", {class: "head"},
+        el("div", {style: "flex:1;min-width:0"},
+          c.mine ? name : el("b", {text: c.name}),
+          el("div", {class: "muted", style: "margin-top:6px", text: (c.title && c.title !== c.name ? c.title + " · " : "") + (c.mine ? "ajouté par toi" : "donné par le propriétaire")})),
+        badge(label, cls)),
+      c.error && st !== "ok" ? el("p", {class: "neg", style: "margin-top:6px", text: c.error}) : null,
+      el("p", {class: "hint", text: `${c.clients} client(s) le copient · dernier signal : ${ls ? ago(ls.at) + " — « " + ls.text.replace(/\s+/g, " ") + " »" : "jamais"}`}),
+      acts));
+  }
+  if (pending) myChanTimer = setTimeout(() => { if (currentTab === "admin") loadMyChannels(); }, 5000);
+}
+$("addMyChan").addEventListener("click", async ev => {
+  const link = $("chanLink").value.trim();
+  if (!link) return toast("Colle le lien de ton canal", "bad");
+  const btn = ev.currentTarget; spinBtn(btn, true, "Ajout…");
+  try {
+    renderMyChannels(await post("/admin/my-channels", {link, name: $("chanName").value.trim() || null, for_clients: $("chanForClients").checked}));
+    $("chanLink").value = ""; $("chanName").value = "";
+    toast("Canal ajouté : le bot le rejoint…", "good");
+    if (admin && admin.me.is_owner) loadSources();
+  } catch (e) { toast(e.message, "bad"); }
+  finally { spinBtn(btn, false, "Ajouter le canal"); }
+});
+$("refreshMyChan").addEventListener("click", () => loadMyChannels());
+
 // ---------------------------------------------------------------- administration
 async function loadAdmin() {
   clearTimeout(adminTimer);
@@ -785,6 +939,7 @@ async function loadAdmin() {
     $("filter").append(el("option", {value: "admins", text: "Admins"}), el("option", {value: "noadmin", text: "Sans admin"}));
   }
   if (admin.me.is_owner) { renderCopy(admin.copy); loadSources(); }
+  loadMyChannels();
   renderUsers();
   adminTimer = setTimeout(() => { if (currentTab === "admin") loadAdmin(); }, 30000);
 }
