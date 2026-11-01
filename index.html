@@ -437,9 +437,7 @@ select option{background:var(--panel)}
 // Adresse du tunnel : à mettre à jour à chaque nouveau lancement de cloudflared
 // Adresse de l'API : donnée par le bouton Menu du bot (?api=...), mise à jour à chaque lancement par LANCER_BOT.bat.
 // La valeur écrite ici ne sert que de secours si le bouton n'a pas encore été mis à jour.
-const API_URL = (() => {
-  const fallback = "https://planes-premises-shift-levels.trycloudflare.com";
-  try {
+const API_URL = "https://planes-premises-shift-levels.trycloudflare.com"
     const v = new URLSearchParams(location.search).get("api");
     if (v && /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/i.test(v)) return v;
   } catch (e) {}
