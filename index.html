@@ -416,8 +416,8 @@ details.policy ul{padding-left:18px;margin:4px 0}
   </section>
 
   <section class="card hidden" id="rulescard">
-    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>Gestion de mes trades</h2>
-    <p class="hint">Pour chaque canal, choisis les TP que tu vises : une position est ouverte par TP coché. Le break-even (BE) et le stop suiveur (trailing) sont réglés par ton administrateur.</p>
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>Mes canaux et mes TP</h2>
+    <p class="hint">Active les canaux que tu veux copier, puis choisis les TP que tu vises : une position est ouverte par TP coché. Le break-even (BE) et le stop suiveur (trailing) sont réglés par ton administrateur.</p>
     <div id="clientRules"></div>
   </section>
 
@@ -448,7 +448,7 @@ details.policy ul{padding-left:18px;margin:4px 0}
     <details class="policy"><summary>Pourquoi un signal n'a pas été copié ?</summary>
       <p>Les raisons les plus courantes : compte MT5 déconnecté, copie en pause, limite du jour atteinte, prix déjà au-delà du SL, ou canal non suivi. Le message reçu sur Telegram donne la raison exacte.</p></details>
     <details class="policy"><summary>Qui règle les TP, le BE et le trailing ?</summary>
-      <p>Toi, tu choisis les TP que tu vises et la taille de tes positions, dans Compte. Ton administrateur règle le break-even et le trailing pour chaque canal ; tu les vois dans Compte &gt; Gestion de mes trades.</p></details>
+      <p>Toi, tu choisis les TP que tu vises et la taille de tes positions, dans Compte. Ton administrateur règle le break-even et le trailing pour chaque canal ; tu les vois dans Compte &gt; Mes canaux et mes TP.</p></details>
     <details class="policy"><summary>Pourquoi je ne peux poser qu'une question toutes les 4 h 30 ?</summary>
       <p>Pour que la discussion reste lisible et que chacun ait une réponse. Tu peux commenter les messages autant que tu veux.</p></details>
   </section>
@@ -1603,10 +1603,21 @@ function tpPicker(current, onSave) {
   return el("div", {}, wrap, save);
 }
 function renderClientRules() {
-  const copied = (lotData && lotData.sources || []).filter(s => s.copied);
-  $("rulescard").classList.toggle("hidden", !copied.length);
-  $("clientRules").replaceChildren(...copied.map(s => el("div", {class: "item"},
-    el("h3", {text: s.name}),
+  const list = (lotData && lotData.sources || []).filter(s => s.available || s.copied);
+  $("rulescard").classList.toggle("hidden", !list.length);
+  $("clientRules").replaceChildren(...list.map(s => {
+    // v8 : le client active lui-même les canaux que son administrateur lui propose
+    const cb = el("input", {type: "checkbox", checked: s.copied, disabled: !s.available && !s.copied});
+    cb.addEventListener("change", async () => {
+      cb.disabled = true; haptic("select");
+      try { lotData = await post("/my/sources/" + s.id, {copied: cb.checked}); renderLot(); toast(cb.checked ? `${s.name} : copie activée` : `${s.name} : copie arrêtée`, "good"); }
+      catch (e) { toast(e.message, "bad"); cb.checked = !cb.checked; cb.disabled = false; }
+    });
+    const head = el("label", {class: "checkrow", style: "margin-top:0"},
+      el("span", {}, el("b", {text: s.name}), el("span", {class: "muted", style: "display:block;margin-top:2px",
+        text: !s.listened ? "Canal pas encore écouté" : s.last_signal ? "Dernier signal " + ago(s.last_signal.at) : "Aucun signal pour l'instant"})), cb);
+    if (!s.copied) return el("div", {class: "item"}, head);
+    return el("div", {class: "item"}, head,
     el("label", {text: "TP visés"}),
     tpPicker(s.tps, async tps => {
       lotData = await post("/my/sources/" + s.id, tps ? {tps} : {all_tps: true});
@@ -1614,7 +1625,8 @@ function renderClientRules() {
       toast(tps ? `${s.name} : ${tps.map(t => "TP" + t).join(", ")}` : `${s.name} : tous les TP`, "good");
     }),
     el("p", {class: "hint", text: "Si un signal a moins de TP que ton choix, son dernier TP est pris."}),
-    el("div", {class: "rulesum", text: "Réglé par ton administrateur : " + (s.rules || "—")}))));
+    el("div", {class: "rulesum", text: "Réglé par ton administrateur : " + (s.rules || "—")}));
+  }));
 }
 
 let rulesData = null;
@@ -1703,7 +1715,7 @@ function tourSteps() {
     {tab: "account", sel: "#codecard", t: "Code de parrainage", x: "Entre ici le code donné par ton administrateur."},
     {tab: "account", sel: "#mt5card", t: "Compte MT5", x: "Connecte ton compte de trading : numéro, mot de passe et serveur. Le mot de passe est chiffré."},
     {tab: "account", sel: "#lotcard", t: "Taille des positions", x: "Le lot ouvert pour chaque TP, pour tous les canaux ou canal par canal."},
-    {tab: "account", sel: "#rulescard", t: "Gestion de mes trades", x: "Coche les TP que tu vises sur chaque canal. Le BE et le trailing, réglés par ton administrateur, sont affichés ici."},
+    {tab: "account", sel: "#rulescard", t: "Mes canaux et mes TP", x: "Active les canaux que tu veux copier et coche les TP que tu vises. Le BE et le trailing, réglés par ton administrateur, sont affichés ici."},
     {tab: "account", sel: "#profilecard", t: "Mon profil", x: "Ton rôle, ton statut, ton administrateur et les canaux que tu suis."},
   ];
   if (isAdminUser() && me.status === "active") s.push(
