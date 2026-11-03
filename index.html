@@ -30,7 +30,7 @@ body{
   background-attachment:fixed;-webkit-font-smoothing:antialiased;
   padding-bottom:calc(92px + var(--safe-b));
 }
-button,input,select{font-family:inherit}
+button,input,select,textarea{font-family:inherit}
 .hidden{display:none!important}
 .num{font-variant-numeric:tabular-nums}
 
@@ -132,9 +132,10 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .seg button{flex:1;border:0;background:transparent;color:var(--mute);font-weight:600;font-size:13.5px;padding:10px 6px;border-radius:10px;cursor:pointer;transition:background .2s,color .2s}
 .seg button.active{background:linear-gradient(180deg,rgba(212,166,74,.22),rgba(212,166,74,.12));color:var(--gold-light);box-shadow:inset 0 1px rgba(255,230,170,.08)}
 label{display:block;font-size:10.9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:16px 0 7px}
-input,select{width:100%;border:1px solid var(--line);color:var(--cream);background:rgba(6,5,4,.6);border-radius:13px;padding:12px 14px;font-size:16px;transition:border-color .15s,box-shadow .15s;outline:none}
+input,select,textarea{width:100%;border:1px solid var(--line);color:var(--cream);background:rgba(6,5,4,.6);border-radius:13px;padding:12px 14px;font-size:16px;transition:border-color .15s,box-shadow .15s;outline:none}
 input::placeholder{color:var(--faint)}
-input:focus,select:focus{border-color:rgba(212,166,74,.6);box-shadow:0 0 0 3px rgba(212,166,74,.12)}
+textarea{resize:vertical;min-height:84px;line-height:1.45}
+input:focus,select:focus,textarea:focus{border-color:rgba(212,166,74,.6);box-shadow:0 0 0 3px rgba(212,166,74,.12)}
 select{appearance:none;-webkit-appearance:none;padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a39c8e' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
 select option{background:var(--panel)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin-top:16px;border:0;border-radius:14px;padding:12px 16px;font-size:15px;font-weight:600;cursor:pointer;color:#1a1206;background:var(--btn-grad);box-shadow:inset 0 1px rgba(255,255,255,.3),0 8px 24px -10px rgba(212,166,74,.7);transition:transform .15s,filter .15s,opacity .15s}
@@ -203,6 +204,45 @@ select option{background:var(--panel)}
 #peoplecard{scroll-margin-top:90px}
 .grouphead{margin-top:12px;padding:4px 14px 10px;border-radius:14px;border:1px solid rgba(212,166,74,.3);background:rgba(212,166,74,.05)}
 .grouphead .item{border-bottom:0}
+/* ------------------------------------------------ messages (v8) */
+.thread{padding:16px;margin-top:12px}
+.msg{display:flex;flex-direction:column;gap:4px}
+.msghead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.msghead b{font-size:14px;font-weight:600}
+.msghead .when{font-size:11.5px;color:var(--faint);margin-left:auto}
+.msgtext{white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.5;color:var(--cream);margin:2px 0 0}
+.comments{margin-top:12px;padding-left:12px;border-left:2px solid var(--line-strong);display:flex;flex-direction:column;gap:12px}
+.comments .msgtext{font-size:14px}
+.msgact{display:flex;gap:14px;margin-top:6px}
+.linkbtn{border:0;background:none;padding:0;color:var(--gold);font-size:12.5px;font-weight:600;cursor:pointer}
+.linkbtn.del{color:var(--faint)}
+.replyrow{display:flex;gap:8px;margin-top:10px}
+.replyrow input{flex:1;padding:10px 12px;font-size:15px}
+.replyrow .btn{flex:none}
+.thread.post{border-color:rgba(212,166,74,.4);background:radial-gradient(120% 120% at 100% 0,rgba(212,166,74,.1),transparent 55%),linear-gradient(180deg,rgba(27,24,20,.92),rgba(17,15,13,.92))}
+/* ------------------------------------------------ réglages de trades (v8) */
+.rulebox{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rulebox label{margin-top:10px}
+.rulebox .full{grid-column:1/-1}
+.rulesum{margin-top:8px;font-size:13px;color:var(--gold-light)}
+/* ------------------------------------------------ aide et visite guidée (v8) */
+details.policy{border-top:1px solid var(--line);padding:12px 0}
+details.policy:first-of-type{border-top:0}
+details.policy summary{cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.policy summary::after{content:"+";color:var(--gold);font-size:20px;font-weight:400}
+details.policy[open] summary::after{content:"–"}
+details.policy h4{margin:14px 0 4px;font-size:13px;color:var(--gold-light);font-weight:600}
+details.policy p,details.policy li{color:var(--mute);font-size:13.5px;line-height:1.55}
+details.policy ul{padding-left:18px;margin:4px 0}
+.tourdim{position:fixed;inset:0;background:rgba(0,0,0,.64);z-index:44;pointer-events:none}
+.tourhl{position:relative;z-index:45!important;box-shadow:0 0 0 3px var(--gold),0 0 30px rgba(212,166,74,.35)!important;border-radius:16px}
+.tourbox{position:fixed;left:12px;right:12px;bottom:calc(84px + var(--safe-b));max-width:536px;margin:auto;z-index:60;padding:16px 16px 14px;border-radius:18px;
+  background:linear-gradient(180deg,#221d16,#15120e);border:1px solid rgba(212,166,74,.55);box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.tourbox.tourtop{bottom:auto;top:calc(70px + env(safe-area-inset-top,0px))}
+.tourbox h3{margin:2px 0 6px;font-family:var(--display);font-size:16px;color:var(--gold-light)}
+.tourbox p{margin:0;color:var(--cream);font-size:14px;line-height:1.5}
+.tourbox .tournav{display:flex;align-items:center;gap:8px;margin-top:14px}
+.tourbox .tournav span{flex:1;font-size:12px;color:var(--mute)}
 .panel h4{margin:0;padding:12px 16px 4px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600}
 
 /* ------------------------------------------------ barre d'onglets */
@@ -305,6 +345,26 @@ select option{background:var(--panel)}
   <p class="hint" id="tradesFoot" style="text-align:center;margin:14px 0 0"></p>
 </div>
 
+<!-- ============ MESSAGES (v8) ============ -->
+<div id="tab-chat" class="view hidden">
+  <div>
+    <div class="eyebrow">Communauté</div>
+    <h1 class="pagetitle">Les <em>messages</em></h1>
+    <p class="lead" id="chatLead">La discussion de ton administrateur : ses annonces, les questions des membres et ses réponses.</p>
+  </div>
+  <section class="card hidden" id="roomcard">
+    <label for="roomSelect" style="margin-top:0">Discussion affichée</label>
+    <select id="roomSelect"></select>
+  </section>
+  <section class="card" id="composer">
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span id="composerTitle">Poser une question</span></h2>
+    <textarea id="chatText" maxlength="1000" placeholder="Écris ta question…"></textarea>
+    <p class="hint" id="chatHint"></p>
+    <button class="btn" id="chatSend">Envoyer</button>
+  </section>
+  <div id="threads"><span class="skel" style="height:90px;margin-top:14px;border-radius:20px"></span></div>
+</div>
+
 <!-- ============ COMPTE ============ -->
 <div id="tab-account" class="view hidden">
   <div>
@@ -355,9 +415,80 @@ select option{background:var(--panel)}
     <div id="lotSources"></div>
   </section>
 
+  <section class="card hidden" id="rulescard">
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>Gestion de mes trades</h2>
+    <p class="hint">Pour chaque canal, choisis les TP que tu vises : une position est ouverte par TP coché. Le break-even (BE) et le stop suiveur (trailing) sont réglés par ton administrateur.</p>
+    <div id="clientRules"></div>
+  </section>
+
   <section class="card" id="profilecard">
     <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Mon profil</h2>
     <div id="account" class="rows"><span class="skel" style="height:14px;margin:14px 0"></span><span class="skel" style="height:14px;margin:14px 0;width:70%"></span></div>
+  </section>
+</div>
+
+<!-- ============ AIDE (v8) ============ -->
+<div id="tab-help" class="view hidden">
+  <div>
+    <div class="eyebrow">Besoin d'aide ?</div>
+    <h1 class="pagetitle"><em>Aide</em></h1>
+    <p class="lead">Une visite guidée de l'application, bouton par bouton, et les règles d'utilisation.</p>
+  </div>
+  <section class="card card-gold" id="tourcard">
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Visite guidée</h2>
+    <p>On te montre chaque partie de l'application. Appuie sur « Suivant » pour avancer, à ton rythme.</p>
+    <button class="btn" id="startTour">Lancer la visite</button>
+  </section>
+  <section class="card" id="faqcard">
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Questions fréquentes</h2>
+    <details class="policy"><summary>Comment ça marche ?</summary>
+      <p>Ton administrateur publie des signaux dans un canal Telegram. L'application les lit et ouvre automatiquement les mêmes trades sur ton compte MT5, avec ton lot, une position par TP.</p></details>
+    <details class="policy"><summary>Mon PC ou mon téléphone doit-il rester allumé ?</summary>
+      <p>Non. La copie tourne sur le serveur de ton administrateur. Tu peux fermer l'application.</p></details>
+    <details class="policy"><summary>Pourquoi un signal n'a pas été copié ?</summary>
+      <p>Les raisons les plus courantes : compte MT5 déconnecté, copie en pause, limite du jour atteinte, prix déjà au-delà du SL, ou canal non suivi. Le message reçu sur Telegram donne la raison exacte.</p></details>
+    <details class="policy"><summary>Qui règle les TP, le BE et le trailing ?</summary>
+      <p>Toi, tu choisis les TP que tu vises et la taille de tes positions, dans Compte. Ton administrateur règle le break-even et le trailing pour chaque canal ; tu les vois dans Compte &gt; Gestion de mes trades.</p></details>
+    <details class="policy"><summary>Pourquoi je ne peux poser qu'une question toutes les 4 h 30 ?</summary>
+      <p>Pour que la discussion reste lisible et que chacun ait une réponse. Tu peux commenter les messages autant que tu veux.</p></details>
+  </section>
+  <section class="card" id="policycard">
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Règles et confidentialité</h2>
+    <details class="policy"><summary>Politique d'utilisation</summary>
+      <p><i>Dernière mise à jour : 3 novembre 2026.</i></p>
+      <h4>1. Le service</h4>
+      <p>ASCEND Copy Trading copie automatiquement, sur ton propre compte MetaTrader 5, les signaux publiés dans les canaux Telegram choisis par ton administrateur. Le service est un outil technique : il ne gère pas ton argent et ne prend aucune décision d'investissement à ta place.</p>
+      <h4>2. Risques</h4>
+      <p>Le trading sur le Forex, l'or et les CFD comporte un risque élevé de perte, pouvant aller jusqu'à la totalité du capital déposé. Les performances passées ne garantissent pas les résultats futurs. Les signaux ne sont pas des conseils en investissement personnalisés. N'investis que de l'argent que tu peux te permettre de perdre.</p>
+      <h4>3. Ta responsabilité</h4>
+      <ul>
+        <li>Tu restes seul responsable de ton compte, de ton courtier, de la taille de tes positions et de tes résultats.</li>
+        <li>Tu peux mettre la copie en pause, fermer tes positions ou déconnecter ton compte à tout moment.</li>
+        <li>Tu dois avoir l'âge légal et le droit de trader dans ton pays.</li>
+      </ul>
+      <h4>4. Limites techniques</h4>
+      <p>Un signal peut être copié en retard, à un prix différent ou pas du tout (coupure internet, serveur arrêté, refus du courtier, marché fermé, message mal écrit). Aucune garantie de disponibilité ni de résultat n'est donnée.</p>
+      <h4>5. Messages</h4>
+      <p>Reste respectueux. Sont interdits : insultes, spam, publicité, arnaques, partage de données personnelles d'autrui. Un administrateur peut supprimer un message ou retirer le droit d'écrire.</p>
+      <h4>6. Accès</h4>
+      <p>L'accès est donné par ton administrateur, qui peut le suspendre ou le retirer. Le service peut évoluer ou s'arrêter.</p>
+    </details>
+    <details class="policy"><summary>Politique de confidentialité</summary>
+      <p><i>Dernière mise à jour : 3 novembre 2026.</i></p>
+      <h4>Données utilisées</h4>
+      <ul>
+        <li>Telegram : ton identifiant, ton nom et ton @pseudo.</li>
+        <li>MT5 : numéro de compte, serveur et mot de passe de trading (chiffré, jamais affiché).</li>
+        <li>Trading : solde, positions, historique et résultats de ton compte.</li>
+        <li>Tes réglages dans l'application et tes messages.</li>
+      </ul>
+      <h4>Pourquoi</h4>
+      <p>Uniquement pour faire fonctionner la copie des signaux, t'envoyer les notifications, afficher tes statistiques et permettre à ton administrateur de t'aider.</p>
+      <h4>Qui y a accès</h4>
+      <p>Ton administrateur voit tes trades et tes résultats. Le propriétaire du service peut tout voir pour l'assistance. Tes données ne sont ni vendues ni partagées à des tiers, sauf obligation légale. Elles sont stockées sur le serveur du service.</p>
+      <h4>Durée et tes droits</h4>
+      <p>Tes données sont gardées tant que ton compte est actif. Tu peux déconnecter ton compte MT5 à tout moment (le mot de passe est alors effacé). Pour consulter, corriger ou supprimer tes données, demande-le à ton administrateur dans les messages ou sur Telegram.</p>
+    </details>
   </section>
 </div>
 
@@ -414,6 +545,14 @@ select option{background:var(--panel)}
     <button class="btn" id="addMyChan">Ajouter le canal</button>
   </section>
 
+  <section class="card" id="rulesadmincard">
+    <div class="cardhead">
+      <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Gestion des trades</h2>
+    </div>
+    <p class="hint">Pour <b>tes</b> clients, canal par canal : le break-even et le trailing stop. Les pips sont comptés comme dans les signaux (or : 1 pip = 0,10 $). Tes clients voient ces réglages sans pouvoir les changer ; eux choisissent les TP qu'ils visent.</p>
+    <div id="rulesAdmin"><span class="skel" style="height:50px;margin-top:12px;border-radius:12px"></span></div>
+  </section>
+
   <section class="card hidden" id="copycard">
     <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Copie des trades</h2>
     <div id="services" class="rows"></div>
@@ -446,7 +585,9 @@ select option{background:var(--panel)}
 <nav class="nav" id="nav">
   <button class="active" data-tab="home"><svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Accueil</button>
   <button data-tab="trades"><svg class="i" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>Trades</button>
+  <button data-tab="chat" id="navChat"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Messages<span class="badge hidden" id="chatBadge">0</span></button>
   <button data-tab="account"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Compte</button>
+  <button data-tab="help"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>Aide</button>
   <button data-tab="admin" class="hidden" id="navAdmin"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>Admin<span class="badge hidden" id="pendingBadge">0</span></button>
 </nav>
 <div class="toast off" id="toast"></div>
@@ -566,7 +707,7 @@ function showTab(name, focusId) {
   if (name !== currentTab) haptic("select");
   currentTab = name;
   document.querySelectorAll("#nav button").forEach(x => x.classList.toggle("active", x.dataset.tab === name));
-  for (const t of ["home", "trades", "account", "admin"]) {
+  for (const t of ["home", "trades", "chat", "account", "help", "admin"]) {
     const v = $("tab-" + t);
     const show = t === name;
     if (show && v.classList.contains("hidden")) { v.classList.remove("hidden"); v.style.animation = "none"; void v.offsetWidth; v.style.animation = ""; }
@@ -575,6 +716,7 @@ function showTab(name, focusId) {
   if (focusId) setTimeout(() => $(focusId).scrollIntoView({behavior: "smooth", block: "start"}), 60);
   else window.scrollTo(0, 0);
   if (name === "admin") loadAdmin(true);
+  if (name === "chat") loadChat();
   updateBackButton();
 }
 document.querySelectorAll("#nav button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
@@ -736,6 +878,7 @@ async function loadAccount() {
     return;
   }
   renderMe();
+  loadChatBadge();
   $("mt5card").classList.remove("hidden");
   loadMt5();
   loadLot();
@@ -847,6 +990,7 @@ function renderLot() {
   const def = (lotData.mt5 && lotData.mt5.lot_per_tp) || 0.01;
   $("lotTp").value = st.lot_per_tp ?? "";
   $("lotTp").placeholder = def + " (par défaut)";
+  renderClientRules();
   const box = $("lotSources");
   box.replaceChildren();
   const copied = (lotData.sources || []).filter(s => s.copied);
@@ -951,7 +1095,7 @@ async function loadAdmin(full = false) {
   $("pendingBadge").textContent = admin.pending;
   $("pendingBadge").classList.toggle("hidden", !admin.pending);
   if (admin.me.is_owner) { renderCopy(admin.copy); if (full) loadSources(); }
-  if (full) loadMyChannels();
+  if (full) { loadMyChannels(); loadRulesAdmin(); }
   if (!admin.me.is_owner) adminGroup = admin.me.telegram_id;   // un admin normal voit directement ses clients
   if (adminGroup === null) renderAdminList(); else await loadGroup();
   adminTimer = setTimeout(() => { if (currentTab === "admin") refreshAdmin(); }, 30000);
@@ -1259,6 +1403,19 @@ function userCard(u) {
     card.append(el("p", {class: "hint", text: "Signaux suivis : " + u.sources.map(s => s.name).join(", ")}));
   }
 
+  if (u.role === "user" && !isMe) {
+    // v8 : interdire / autoriser l'écriture dans les messages
+    const mute = el("button", {class: "btn ghost", style: "min-height:42px;margin-top:12px",
+      text: u.muted ? "Autoriser à écrire dans les messages" : "Interdire d'écrire dans les messages"});
+    mute.addEventListener("click", async () => {
+      if (!u.muted && !await confirmBox(`Interdire à ${u.full_name} d'écrire dans les messages ? Il pourra toujours les lire.`)) return;
+      try { await post(`/admin/users/${u.telegram_id}/mute`, {muted: !u.muted}); toast(u.muted ? "Il peut de nouveau écrire" : "Droit d'écrire retiré", "good"); await loadAdmin(); }
+      catch (e) { toast(e.message, "bad"); }
+    });
+    if (u.muted) card.querySelector(".badges").append(badge("Muet", "err nodot"));
+    card.append(mute);
+  }
+
   const panel = el("div", {class: "panel hidden"});
   const btn = el("button", {class: "btn ghost", style: "min-height:42px;margin-top:12px", text: "Voir les trades"});
   btn.addEventListener("click", async () => {
@@ -1314,6 +1471,290 @@ async function changeReferrer(u, v) {
   toast("Administrateur du client modifié", "good"); await loadAdmin();
 }
 
+
+// ================================================================ v8 : messages
+let chatData = null, chatRoom = null, chatTimer = null, replyOpen = null;
+const ROLE_TAG = {owner: ["Propriétaire", "blue"], admin: ["Admin", "blue"], client: ["Membre", ""]};
+async function loadChatBadge() {
+  try {
+    const {unread} = await api("/chat/unread");
+    $("chatBadge").textContent = unread > 99 ? "99+" : unread;
+    $("chatBadge").classList.toggle("hidden", !unread || currentTab === "chat");
+  } catch (e) {}
+  clearTimeout(loadChatBadge.t); loadChatBadge.t = setTimeout(loadChatBadge, 60000);
+}
+async function loadChat(quiet = false) {
+  clearTimeout(chatTimer);
+  if (!me) { chatTimer = setTimeout(() => currentTab === "chat" && loadChat(), 1500); return; }
+  try { chatData = await api("/chat" + (chatRoom !== null ? "?room=" + chatRoom : "")); chatRoom = chatData.room.id; renderChat(); $("chatBadge").classList.add("hidden"); }
+  catch (e) {
+    $("composer").classList.add("hidden"); $("roomcard").classList.add("hidden");
+    $("threads").replaceChildren(el("section", {class: "card"}, emptyBox(e.message)));
+  }
+  chatTimer = setTimeout(() => {
+    if (currentTab !== "chat") return;
+    const a = document.activeElement;
+    if (a && (a.id === "chatText" || a.closest && a.closest(".replyrow"))) { chatTimer = setTimeout(() => loadChat(true), 20000); return; }
+    loadChat(true);
+  }, 20000);
+}
+function renderChat() {
+  const d = chatData;
+  $("chatLead").textContent = d.moderator
+    ? (d.room.id === me.telegram_id ? "Ta discussion : publie des annonces et réponds aux questions de tes clients." : "Discussion de " + d.room.name + " : tu peux publier, répondre et supprimer.")
+    : "La discussion de " + d.room.name + " : ses annonces, les questions des membres et ses réponses.";
+  // choix de la discussion (propriétaire et ultra-admins)
+  if (d.rooms) {
+    $("roomcard").classList.remove("hidden");
+    const sel = $("roomSelect");
+    sel.replaceChildren(...d.rooms.map(r => el("option", {value: r.id,
+      text: (r.id === me.telegram_id ? "Ma discussion" : r.name + (r.is_ultra ? " (ultra-admin)" : "")) + ` · ${r.count} message(s)` + (r.unread ? ` · ${r.unread} nouveau(x)` : "")})));
+    sel.value = String(d.room.id);
+  } else $("roomcard").classList.add("hidden");
+  // zone d'écriture
+  const comp = $("composer");
+  comp.classList.remove("hidden");
+  $("composerTitle").textContent = d.moderator ? "Publier une annonce" : "Poser une question";
+  $("chatText").placeholder = d.moderator ? "Écris une annonce pour tes clients…" : "Écris ta question…";
+  const wait = d.next_question_at ? Math.max(0, d.next_question_at - d.server_time) : 0;
+  let hint = "";
+  if (d.muted) hint = "Ton administrateur t'a retiré le droit d'écrire. Tu peux toujours lire les messages.";
+  else if (!d.can_write) hint = "Tu pourras écrire dès que ton accès sera activé.";
+  else if (!d.moderator && wait > 0) hint = `Prochaine question dans ${Math.floor(wait / 3600)} h ${String(Math.floor(wait % 3600 / 60)).padStart(2, "0")}. Tu peux commenter les messages ci-dessous.`;
+  else if (!d.moderator) hint = "Une question toutes les 4 h 30. Les commentaires sont illimités.";
+  $("chatHint").textContent = hint;
+  const blocked = d.muted || !d.can_write || (!d.moderator && wait > 0);
+  $("chatText").disabled = blocked; $("chatSend").disabled = blocked;
+  // fils de discussion
+  const box = $("threads");
+  if (!d.threads.length) { box.replaceChildren(el("section", {class: "card"}, emptyBox(d.moderator ? "Aucun message pour l'instant : publie la première annonce." : "Aucun message pour l'instant. Pose la première question !"))); return; }
+  box.replaceChildren(...d.threads.map(threadCard));
+}
+function msgBlock(m) {
+  const [label, cls] = ROLE_TAG[m.author.role] || ROLE_TAG.client;
+  const acts = el("div", {class: "msgact"});
+  if (m.can_delete) acts.append(el("button", {class: "linkbtn del", text: "Supprimer", onclick: async () => {
+    if (!await confirmBox("Supprimer ce message" + (m.comments ? " et ses réponses" : "") + " ?")) return;
+    try { chatData = await api("/chat/" + m.id, {method: "DELETE"}); renderChat(); toast("Message supprimé"); } catch (e) { toast(e.message, "bad"); }
+  }}));
+  return el("div", {class: "msg"},
+    el("div", {class: "msghead"}, el("b", {text: m.author.name + (m.mine ? " (toi)" : "")}),
+      m.author.role !== "client" ? badge(m.author.ultra ? "Ultra-admin" : label, cls + " nodot") : null,
+      m.kind === "question" ? badge("Question", "wait nodot") : m.kind === "post" ? badge("Annonce", "ok nodot") : null,
+      el("span", {class: "when", text: ago(m.at)})),
+    el("p", {class: "msgtext", text: m.text}), acts.children.length ? acts : null);
+}
+function threadCard(t) {
+  const card = el("section", {class: "card thread" + (t.kind === "post" ? " post" : "")}, msgBlock(t));
+  if (t.comments.length) card.append(el("div", {class: "comments"}, ...t.comments.map(msgBlock)));
+  const d = chatData;
+  if (d.can_write) {
+    const input = el("input", {placeholder: "Répondre…", maxlength: "1000"});
+    const send = el("button", {class: "btn sm", text: "Envoyer"});
+    const row = el("div", {class: "replyrow" + (replyOpen === t.id ? "" : " hidden")}, input, send);
+    const go = async () => {
+      const text = input.value.trim(); if (!text) return;
+      spinBtn(send, true);
+      try { chatData = await post("/chat", {text, parent_id: t.id}); replyOpen = t.id; renderChat(); haptic("success"); }
+      catch (e) { toast(e.message, "bad"); spinBtn(send, false, "Envoyer"); }
+    };
+    send.addEventListener("click", go);
+    input.addEventListener("keydown", ev => { if (ev.key === "Enter") go(); });
+    const toggle = el("button", {class: "linkbtn", text: t.comments.length ? `Répondre (${t.comments.length} réponse${t.comments.length > 1 ? "s" : ""})` : "Répondre"});
+    toggle.addEventListener("click", () => { haptic("light"); row.classList.toggle("hidden"); replyOpen = row.classList.contains("hidden") ? null : t.id; if (!row.classList.contains("hidden")) input.focus(); });
+    card.append(el("div", {class: "msgact"}, toggle), row);
+  }
+  return card;
+}
+$("roomSelect").addEventListener("change", () => { chatRoom = Number($("roomSelect").value); replyOpen = null; haptic("select"); loadChat(); });
+$("chatSend").addEventListener("click", async ev => {
+  const text = $("chatText").value.trim();
+  if (!text) return toast("Écris d'abord ton message", "bad");
+  const btn = ev.currentTarget; spinBtn(btn, true, "Envoi…");
+  try {
+    chatData = await post("/chat", {text, room_id: chatRoom});
+    $("chatText").value = ""; renderChat();
+    toast(chatData.moderator ? "Annonce publiée" : "Question envoyée à ton administrateur", "good");
+  } catch (e) { toast(e.message, "bad"); }
+  finally { spinBtn(btn, false, "Envoyer"); if (chatData) renderChat(); }
+});
+
+// ================================================================ v8 : gestion des trades
+function tpPicker(current, onSave) {
+  // « Tous » ou une sélection de TP1 à TP5 ; enregistré avec le bouton
+  const all = !current || !current.length;
+  const wrap = el("div", {class: "checks"});
+  const allCb = el("input", {type: "checkbox", checked: all});
+  wrap.append(el("label", {class: "check"}, allCb, "Tous"));
+  const cbs = [];
+  for (let i = 1; i <= 5; i++) {
+    const cb = el("input", {type: "checkbox", checked: all || current.includes(i), disabled: all});
+    cb.dataset.i = i; cbs.push(cb);
+    wrap.append(el("label", {class: "check"}, cb, "TP" + i));
+  }
+  const save = el("button", {class: "btn sm", text: "Enregistrer", style: "margin-top:10px"});
+  allCb.addEventListener("change", () => cbs.forEach(cb => { cb.disabled = allCb.checked; if (allCb.checked) cb.checked = true; }));
+  save.addEventListener("click", async () => {
+    const tps = allCb.checked ? null : cbs.filter(cb => cb.checked).map(cb => Number(cb.dataset.i));
+    if (tps && !tps.length) return toast("Coche au moins un TP", "bad");
+    spinBtn(save, true);
+    try { await onSave(tps); } catch (e) { toast(e.message, "bad"); spinBtn(save, false, "Enregistrer"); }
+  });
+  return el("div", {}, wrap, save);
+}
+function renderClientRules() {
+  const copied = (lotData && lotData.sources || []).filter(s => s.copied);
+  $("rulescard").classList.toggle("hidden", !copied.length);
+  $("clientRules").replaceChildren(...copied.map(s => el("div", {class: "item"},
+    el("h3", {text: s.name}),
+    el("label", {text: "TP visés"}),
+    tpPicker(s.tps, async tps => {
+      lotData = await post("/my/sources/" + s.id, tps ? {tps} : {all_tps: true});
+      renderLot();
+      toast(tps ? `${s.name} : ${tps.map(t => "TP" + t).join(", ")}` : `${s.name} : tous les TP`, "good");
+    }),
+    el("p", {class: "hint", text: "Si un signal a moins de TP que ton choix, son dernier TP est pris."}),
+    el("div", {class: "rulesum", text: "Réglé par ton administrateur : " + (s.rules || "—")}))));
+}
+
+let rulesData = null;
+async function loadRulesAdmin() {
+  try { rulesData = await api("/admin/trade-rules"); renderRulesAdmin(); }
+  catch (e) { message($("rulesAdmin"), e.message); }
+}
+function ruleEditor(c) {
+  const r = c.rule;
+
+  const sel = (opts, v) => { const x = el("select", {}, ...opts.map(([k, t]) => el("option", {value: k, text: t}))); x.value = v; return x; };
+  const num = v => el("input", {inputmode: "decimal", placeholder: "pips", value: v ?? ""});
+  const be = sel([["off", "Désactivé"], ["tp1", "Après TP1"], ["tp2", "Après TP2"], ["pips", "Après X pips"]], r.be_mode);
+  const bePips = num(r.be_pips);
+  const tr = sel([["off", "Désactivé"], ["pips", "Activé"]], r.trail_mode);
+  const trPips = num(r.trail_pips);
+  const trStart = sel([["tp1", "Dès TP1"], ["tp2", "Dès TP2"], ["pips", "Après X pips"]], r.trail_start || "tp1");
+  const trStartPips = num(r.trail_start_pips);
+  const beBox = el("div", {}, el("label", {text: "BE : pips"}), bePips);
+  const trBox = el("div", {}, el("label", {text: "Distance (pips)"}), trPips);
+  const stBox = el("div", {}, el("label", {text: "Trailing à partir de"}), trStart);
+  const stPipsBox = el("div", {}, el("label", {text: "Départ : pips"}), trStartPips);
+  const sync = () => {
+    beBox.classList.toggle("hidden", be.value !== "pips");
+    [trBox, stBox].forEach(b => b.classList.toggle("hidden", tr.value !== "pips"));
+    stPipsBox.classList.toggle("hidden", tr.value !== "pips" || trStart.value !== "pips");
+  };
+  [be, tr, trStart].forEach(x => x.addEventListener("change", sync)); sync();
+
+  const save = el("button", {class: "btn", text: "Enregistrer"});
+  save.addEventListener("click", async () => {
+    const rule = {
+      be_mode: be.value, be_pips: parseNum(bePips.value),
+      trail_mode: tr.value, trail_pips: parseNum(trPips.value), trail_start: trStart.value, trail_start_pips: parseNum(trStartPips.value),
+    };
+    spinBtn(save, true, "Enregistrement…");
+    try { rulesData = await post("/admin/trade-rules/" + c.id, {rule}); renderRulesAdmin(); toast("Réglages enregistrés pour " + c.name, "good"); }
+    catch (e) { toast(e.message, "bad"); spinBtn(save, false, "Enregistrer"); }
+  });
+  const reset = el("button", {class: "btn ghost", text: "Par défaut"});
+  reset.addEventListener("click", async () => {
+    if (!await confirmBox(`Revenir aux réglages par défaut pour « ${c.name} » ? (${rulesData.default_summary})`)) return;
+    try { rulesData = await post("/admin/trade-rules/" + c.id, {reset: true}); renderRulesAdmin(); toast("Réglages par défaut", "good"); }
+    catch (e) { toast(e.message, "bad"); }
+  });
+  return el("div", {},
+    el("div", {class: "rulebox"},
+      el("div", {}, el("label", {text: "Break-even"}), be), beBox,
+      el("div", {}, el("label", {text: "Trailing stop"}), tr), trBox, stBox, stPipsBox),
+    el("p", {class: "hint", text: "BE « après TP1/TP2 » : déclenché quand le prix atteint ce TP, même s'il n'est pas copié. Trailing : le stop suit le prix à la distance choisie et ne recule jamais."}),
+    el("div", {class: "btnrow"}, reset, save));
+}
+function renderRulesAdmin() {
+  const box = $("rulesAdmin");
+  const d = rulesData;
+  if (!d.channels.length) return box.replaceChildren(el("p", {class: "hint", style: "margin-top:12px", text: "Aucun canal pour l'instant : ajoute d'abord un canal dans « Mes canaux »."}));
+  box.replaceChildren(...d.channels.map(c => {
+    const editor = el("div", {class: "hidden"});
+    const open = el("button", {class: "btn sm ghost", text: "Modifier"});
+    open.addEventListener("click", () => {
+      haptic("light");
+      if (!editor.children.length) editor.append(ruleEditor(c));
+      editor.classList.toggle("hidden"); open.textContent = editor.classList.contains("hidden") ? "Modifier" : "Fermer";
+    });
+    return el("div", {class: "item"},
+      el("div", {class: "head"},
+        el("div", {style: "flex:1;min-width:0"}, el("h3", {text: c.name}),
+          el("div", {class: "rulesum", text: c.summary}),
+          el("div", {class: "muted", style: "margin-top:4px", text: c.custom ? "Réglage personnalisé" : "Réglage par défaut"})),
+        open),
+      editor);
+  }));
+}
+
+// ================================================================ v8 : visite guidée
+const tour = {on: false, i: 0, steps: [], box: null, hl: null};
+function tourSteps() {
+  const s = [
+    {tab: "home", sel: "#hero", t: "Ton tableau de bord", x: "Ton solde, le résultat des positions en cours, tes gains du jour, de la semaine et du mois, et ton taux de réussite."},
+    {tab: "home", sel: ".quick", t: "Raccourcis", x: "Accès rapide à tes trades, à ton compte MT5 et à tes signaux. « Actualiser » recharge tes chiffres."},
+    {tab: "home", sel: "#stepscard", t: "Ma configuration", x: "Les étapes pour que la copie marche. Quand tout est coché, tu n'as plus rien à faire."},
+    {tab: "home", sel: "#homeOpen", t: "Positions ouvertes", x: "Les trades en cours sur ton compte, avec leur résultat en direct."},
+    {tab: "trades", sel: "#tradeSeg", t: "Mes trades", x: "« En cours » : tes positions ouvertes. « Historique » : tes trades des 30 derniers jours."},
+    {tab: "chat", sel: "#composer", t: "Poser une question", x: "Écris à ton administrateur. Une question toutes les 4 h 30 ; tu peux commenter sans limite."},
+    {tab: "chat", sel: "#threads", t: "La discussion", x: "Les annonces de ton administrateur et les questions des membres. « Répondre » pour commenter."},
+    {tab: "account", sel: "#codecard", t: "Code de parrainage", x: "Entre ici le code donné par ton administrateur."},
+    {tab: "account", sel: "#mt5card", t: "Compte MT5", x: "Connecte ton compte de trading : numéro, mot de passe et serveur. Le mot de passe est chiffré."},
+    {tab: "account", sel: "#lotcard", t: "Taille des positions", x: "Le lot ouvert pour chaque TP, pour tous les canaux ou canal par canal."},
+    {tab: "account", sel: "#rulescard", t: "Gestion de mes trades", x: "Coche les TP que tu vises sur chaque canal. Le BE et le trailing, réglés par ton administrateur, sont affichés ici."},
+    {tab: "account", sel: "#profilecard", t: "Mon profil", x: "Ton rôle, ton statut, ton administrateur et les canaux que tu suis."},
+  ];
+  if (isAdminUser() && me.status === "active") s.push(
+    {tab: "admin", sel: "#peoplecard", t: "Clients et administrateurs", x: "Touche un administrateur pour voir ses clients. Sur chaque client : statut, canaux, trades et droit d'écrire."},
+    {tab: "admin", sel: ".card-gold #mycode", t: "Ton code de parrainage", x: "Donne-le à tes clients : en l'entrant, ils sont rattachés à toi."},
+    {tab: "admin", sel: "#mychancard", t: "Mes canaux", x: "Colle le lien de ton canal Telegram : le bot le rejoint et tes clients copient ses signaux."},
+    {tab: "admin", sel: "#rulesadmincard", t: "Gestion des trades", x: "Pour chaque canal : quand tes clients passent au break-even, et le trailing stop."},
+    {tab: "admin", sel: "#copycard", t: "Copie des trades", x: "Mode réel ou simulation, et l'arrêt d'urgence qui bloque toute nouvelle position."},
+    {tab: "admin", sel: "#sourcecard", t: "Sources de signaux", x: "Les canaux écoutés et les administrateurs qui peuvent les donner à leurs clients."});
+  s.push({tab: "help", sel: "#policycard", t: "Règles et confidentialité", x: "La politique d'utilisation et la politique de confidentialité. Tu peux relancer cette visite quand tu veux."});
+  return s;
+}
+function startTour() {
+  tour.steps = tourSteps(); tour.i = 0; tour.on = true;
+  if (!tour.box) { tour.dim = el("div", {class: "tourdim"}); tour.box = el("div", {class: "tourbox"}); document.body.append(tour.dim, tour.box); }
+  tour.box.classList.remove("hidden"); tour.dim.classList.remove("hidden");
+  showStep(0, 1);
+}
+function endTour() {
+  tour.on = false;
+  if (tour.hl) tour.hl.classList.remove("tourhl");
+  if (tour.box) { tour.box.classList.add("hidden"); tour.dim.classList.add("hidden"); }
+  showTab("help");
+}
+function showStep(i, dir) {
+  if (tour.hl) { tour.hl.classList.remove("tourhl"); tour.hl = null; }
+  if (i < 0) i = 0;
+  if (i >= tour.steps.length) return endTour();
+  const st = tour.steps[i];
+  if (currentTab !== st.tab) showTab(st.tab);
+  setTimeout(() => {
+    let target = document.querySelector(st.sel);
+    if (target && st.sel.includes("#mycode")) target = target.closest(".card");
+    if (!target || target.offsetParent === null || target.closest(".hidden")) return showStep(i + (dir || 1), dir || 1);  // pas affiché pour ce compte : on passe
+    tour.i = i;
+    target.classList.add("tourhl"); tour.hl = target;
+    target.scrollIntoView({behavior: "smooth", block: "center"});
+    const rect = target.getBoundingClientRect();
+    tour.box.classList.toggle("tourtop", rect.top > window.innerHeight * 0.55);
+    const last = i === tour.steps.length - 1;
+    tour.box.replaceChildren(
+      el("h3", {text: st.t}), el("p", {text: st.x}),
+      el("div", {class: "tournav"},
+        el("span", {text: `${i + 1} / ${tour.steps.length}`}),
+        el("button", {class: "btn sm ghost", text: "Quitter", onclick: endTour}),
+        i > 0 ? el("button", {class: "btn sm ghost", text: "Précédent", onclick: () => { haptic("light"); showStep(i - 1, -1); }}) : null,
+        el("button", {class: "btn sm", text: last ? "Terminer" : "Suivant", onclick: () => { haptic("light"); showStep(i + 1, 1); }})));
+  }, 120);
+}
+$("startTour").addEventListener("click", () => { haptic("medium"); startTour(); });
+
 // ---------------------------------------------------------------- démarrage
 const h = new Date().getHours();
 $("greet").textContent = (h >= 18 || h < 5 ? "Bonsoir" : "Bonjour") + ",";
@@ -1323,6 +1764,7 @@ if (tg) {
   try { tg.setHeaderColor("#060504"); tg.setBackgroundColor("#060504"); if (tg.setBottomBarColor) tg.setBottomBarColor("#080706"); } catch (e) {}
   try { if (tg.disableVerticalSwipes) tg.disableVerticalSwipes(); } catch (e) {}
   if (tg.BackButton) tg.BackButton.onClick(() => {
+    if (tour.on) return endTour();
     // Dans Admin, le bouton retour referme d'abord la liste des clients d'un administrateur.
     if (currentTab === "admin" && admin && admin.me.is_owner && adminGroup !== null) closeGroup();
     else showTab("home");
