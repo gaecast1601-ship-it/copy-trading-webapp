@@ -192,6 +192,17 @@ select option{background:var(--panel)}
 .stat b{display:block;font-size:14px;font-weight:700}
 .stat span{font-size:10px;color:var(--mute);letter-spacing:.06em}
 .panel{margin-top:10px;border-radius:14px;background:rgba(6,5,4,.55);border:1px solid var(--line);overflow:hidden}
+.adminrow{display:flex;align-items:center;gap:12px;width:100%;padding:14px 0;border:0;border-bottom:1px solid var(--line);background:transparent;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.adminrow:last-child{border-bottom:0}
+.adminrow .who{flex:1;min-width:0}
+.adminrow h3{margin:0;font-size:15.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adminrow .count{flex:none;text-align:right;font-size:12px;color:var(--mute)}
+.adminrow .count b{display:block;font-size:17px;color:var(--cream)}
+.adminrow svg.chev{width:18px;height:18px;flex:none;color:var(--faint)}
+.adminrow:active{background:rgba(212,166,74,.06)}
+#peoplecard{scroll-margin-top:90px}
+.grouphead{margin-top:12px;padding:4px 14px 10px;border-radius:14px;border:1px solid rgba(212,166,74,.3);background:rgba(212,166,74,.05)}
+.grouphead .item{border-bottom:0}
 .panel h4{margin:0;padding:12px 16px 4px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600}
 
 /* ------------------------------------------------ barre d'onglets */
@@ -357,6 +368,27 @@ select option{background:var(--panel)}
     <h1 class="pagetitle"><em>Administration</em></h1>
   </div>
 
+  <!-- v7 : d'abord la liste des administrateurs, puis les clients de l'admin choisi -->
+  <section class="card" id="peoplecard">
+    <div class="cardhead">
+      <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.5 2.4 3.5 5.2"/></svg><span id="usersTitle">Mes clients</span></h2>
+      <button class="btn sm ghost" id="refreshPeople">Actualiser</button>
+    </div>
+    <button class="btn sm ghost hidden" id="groupBack" style="margin-top:4px">‹ Tous les administrateurs</button>
+    <div id="userStats" class="muted" style="margin-top:6px"></div>
+    <div class="toolbar">
+      <input id="search" placeholder="Nom, @pseudo ou ID">
+      <select id="filter">
+        <option value="all">Tous</option>
+        <option value="pending">En attente</option>
+        <option value="active">Actifs</option>
+        <option value="revoked">Révoqués</option>
+      </select>
+    </div>
+    <div id="groupHead"></div>
+    <div id="users"><span class="skel" style="height:60px;margin-top:16px;border-radius:12px"></span></div>
+  </section>
+
   <section class="card card-gold">
     <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 9.2-9.2M17 6l3 3M15 8l2 2"/></svg>Mon code de parrainage</h2>
     <p>Donne ce code à tes clients : en l'entrant dans l'application, ils sont rattachés à toi.</p>
@@ -408,20 +440,6 @@ select option{background:var(--panel)}
     </div>
   </section>
 
-  <section class="card">
-    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.5 2.4 3.5 5.2"/></svg><span id="usersTitle">Mes clients</span></h2>
-    <div id="userStats" class="muted" style="margin-top:6px"></div>
-    <div class="toolbar">
-      <input id="search" placeholder="Nom, @pseudo ou ID">
-      <select id="filter">
-        <option value="all">Tous</option>
-        <option value="pending">En attente</option>
-        <option value="active">Actifs</option>
-        <option value="revoked">Révoqués</option>
-      </select>
-    </div>
-    <div id="users"><span class="skel" style="height:60px;margin-top:16px;border-radius:12px"></span></div>
-  </section>
 </div>
 </main>
 
@@ -441,7 +459,7 @@ const API_URL = "https://portfolio-fruits-harvest-amazing.trycloudflare.com";
 const BOT_LINK = "https://t.me/AscendCopyBot";
 
 const LABELS = {
-  role: {super_admin: "Propriétaire", admin: "Administrateur", user: "Client"},
+  role: {super_admin: "Propriétaire", ultra: "Ultra-admin", admin: "Administrateur", user: "Client"},
   status: {pending: "En attente", active: "Actif", revoked: "Révoqué"}
 };
 const STATUS_CLASS = {pending: "wait", active: "ok", revoked: "err"};
@@ -451,6 +469,7 @@ const $ = id => document.getElementById(id);
 let me = null, mt5acc = undefined, myStats = undefined, admin = null, sourcesData = null;
 let pollTimer = null, adminTimer = null, tradesTimer = null, tradeView = "open", currentTab = "home";
 const openPanels = new Set();
+let adminGroup = null, groupData = null;   // v7 : admin dont on regarde les clients (0 = sans administrateur)
 
 // ---------------------------------------------------------------- outils
 function el(tag, attrs = {}, ...children) {
@@ -555,7 +574,7 @@ function showTab(name, focusId) {
   }
   if (focusId) setTimeout(() => $(focusId).scrollIntoView({behavior: "smooth", block: "start"}), 60);
   else window.scrollTo(0, 0);
-  if (name === "admin") loadAdmin();
+  if (name === "admin") loadAdmin(true);
   updateBackButton();
 }
 document.querySelectorAll("#nav button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
@@ -726,7 +745,7 @@ async function loadAccount() {
 function renderMe() {
   setPill("En ligne", "ok");
   const isAdmin = isAdminUser();
-  const list = [["Rôle", LABELS.role[me.role] || me.role], ["Statut", LABELS.status[me.status] || me.status]];
+  const list = [["Rôle", roleLabel(me)],["Statut", LABELS.status[me.status] || me.status]];
   if (!isAdmin) list.push(["Administrateur", me.referrer ? me.referrer.name : "aucun (entre ton code)"]);
   list.push(["Signaux suivis", me.sources.length ? me.sources.map(s => s.name).join(", ") : "aucun"]);
   rows($("account"), list);
@@ -922,20 +941,132 @@ $("addMyChan").addEventListener("click", async ev => {
 $("refreshMyChan").addEventListener("click", () => loadMyChannels());
 
 // ---------------------------------------------------------------- administration
-async function loadAdmin() {
+// v7 : full = true à l'ouverture de l'onglet (recharge aussi Mes canaux et Sources).
+// Sinon on ne recharge que l'aperçu léger et la liste affichée : beaucoup plus rapide.
+async function loadAdmin(full = false) {
   clearTimeout(adminTimer);
   try { admin = await api("/admin/overview"); }
   catch (e) { message($("users"), e.message); return; }
   $("mycode").textContent = admin.me.code;
-  $("usersTitle").textContent = admin.me.is_owner ? "Utilisateurs" : "Mes clients";
-  if (admin.me.is_owner && !$("filter").querySelector('[value="noadmin"]')) {
-    $("filter").append(el("option", {value: "admins", text: "Admins"}), el("option", {value: "noadmin", text: "Sans admin"}));
-  }
-  if (admin.me.is_owner) { renderCopy(admin.copy); loadSources(); }
-  loadMyChannels();
-  renderUsers();
-  adminTimer = setTimeout(() => { if (currentTab === "admin") loadAdmin(); }, 30000);
+  $("pendingBadge").textContent = admin.pending;
+  $("pendingBadge").classList.toggle("hidden", !admin.pending);
+  if (admin.me.is_owner) { renderCopy(admin.copy); if (full) loadSources(); }
+  if (full) loadMyChannels();
+  if (!admin.me.is_owner) adminGroup = admin.me.telegram_id;   // un admin normal voit directement ses clients
+  if (adminGroup === null) renderAdminList(); else await loadGroup();
+  adminTimer = setTimeout(() => { if (currentTab === "admin") refreshAdmin(); }, 30000);
 }
+
+// Rafraîchissement automatique : ne redessine pas une liste de clients ouverte (pour ne pas fermer tes panneaux).
+async function refreshAdmin() {
+  clearTimeout(adminTimer);
+  try {
+    admin = await api("/admin/overview");
+    $("pendingBadge").textContent = admin.pending;
+    $("pendingBadge").classList.toggle("hidden", !admin.pending);
+    if (admin.me.is_owner) renderCopy(admin.copy);
+    if (adminGroup === null && document.activeElement !== $("search")) renderAdminList();
+  } catch (e) {}
+  adminTimer = setTimeout(() => { if (currentTab === "admin") refreshAdmin(); }, 30000);
+}
+
+function roleLabel(u) { return u.is_ultra ? LABELS.role.ultra : (LABELS.role[u.role] || u.role); }
+
+// ---- liste des administrateurs (propriétaire et ultra-admins)
+function renderAdminList() {
+  groupData = null;
+  $("usersTitle").textContent = "Administrateurs";
+  $("groupBack").classList.add("hidden");
+  $("filter").classList.add("hidden");
+  $("search").placeholder = "Chercher quelqu'un : nom, @pseudo ou ID";
+  $("groupHead").replaceChildren();
+  const list = admin.admin_list || [];
+  const admins = list.filter(a => a.telegram_id !== 0).length;
+  $("userStats").textContent = `${admins} administrateur(s) · ${admin.total} personne(s) au total · ${admin.pending} en attente`;
+  const box = $("users");
+  const q = $("search").value.trim().toLowerCase();
+  if (q) {
+    // Recherche globale : touche une personne pour ouvrir le groupe de son administrateur.
+    const found = (admin.people || []).filter(p => [p.name, p.username, String(p.telegram_id)].some(x => x && String(x).toLowerCase().includes(q))).slice(0, 30);
+    box.replaceChildren(...(found.length ? found.map(p => {
+      const groupName = (list.find(a => a.telegram_id === p.group) || {}).name || "Sans administrateur";
+      return el("button", {class: "adminrow", onclick: () => openGroup(p.group, p.telegram_id)},
+        el("div", {class: "who"},
+          el("h3", {text: p.name}),
+          el("div", {class: "muted", text: (p.username ? "@" + p.username + " · " : "") + "ID " + p.telegram_id + (p.role === "user" ? " · " + groupName : "")})),
+        badge(LABELS.status[p.status] || p.status, STATUS_CLASS[p.status]),
+        icon("chev", "chev"));
+    }) : [emptyBox("Personne ne correspond à cette recherche.")]));
+    return;
+  }
+  if (!list.length) return box.replaceChildren(emptyBox("Aucun administrateur."));
+  box.replaceChildren(...list.map(a => {
+    const isNone = a.telegram_id === 0;
+    const sub = `${a.active} actif(s)` + (a.pending ? ` · ${a.pending} en attente` : "") + ` · ${a.mt5} MT5`;
+    return el("button", {class: "adminrow", onclick: () => openGroup(a.telegram_id)},
+      el("div", {class: "who"},
+        el("h3", {text: a.name + (a.telegram_id === admin.me.telegram_id ? " (toi)" : "")}),
+        el("div", {class: "badges", style: "margin-top:6px"},
+          isNone ? badge("Clients sans code", "wait nodot") : badge(roleLabel(a), "blue nodot"),
+          !isNone && a.status !== "active" ? badge(LABELS.status[a.status] || a.status, STATUS_CLASS[a.status]) : null,
+          a.pending ? badge(a.pending + " en attente", "wait") : null),
+        el("div", {class: "muted", style: "margin-top:6px", text: sub})),
+      el("div", {class: "count"}, el("b", {text: String(a.clients)}), "client" + (a.clients > 1 ? "s" : "")),
+      icon("chev", "chev"));
+  }));
+}
+
+function openGroup(id, focusUser) {
+  haptic("light");
+  adminGroup = id;
+  $("search").value = focusUser ? String(focusUser) : "";
+  $("filter").value = "all";
+  $("users").replaceChildren(el("span", {class: "skel", style: "height:60px;margin-top:16px;border-radius:12px"}));
+  $("peoplecard").scrollIntoView({behavior: "smooth", block: "start"});
+  loadGroup();
+}
+function closeGroup() {
+  haptic("light");
+  adminGroup = null; $("search").value = "";
+  renderAdminList();
+  $("peoplecard").scrollIntoView({behavior: "smooth", block: "start"});
+}
+$("groupBack").addEventListener("click", closeGroup);
+$("refreshPeople").addEventListener("click", () => { haptic("light"); loadAdmin(); });
+
+// ---- un administrateur et ses clients
+async function loadGroup() {
+  const id = adminGroup;
+  try { const d = await api(`/admin/admins/${id}/clients`); if (id !== adminGroup) return; groupData = d; }
+  catch (e) {
+    if (e.status === 404 && admin.me.is_owner) { adminGroup = null; renderAdminList(); return; }  // ce n'est plus un admin
+    message($("users"), e.message); return;
+  }
+  renderGroup();
+}
+
+function renderGroup() {
+  const owner = admin.me.is_owner;
+  const g = groupData;
+  const mine = g.admin_id === admin.me.telegram_id;
+  $("usersTitle").textContent = !owner || mine ? "Mes clients" : g.admin ? "Clients de " + g.admin.name : "Sans administrateur";
+  $("groupBack").classList.toggle("hidden", !owner);
+  $("filter").classList.remove("hidden");
+  $("search").placeholder = "Nom, @pseudo ou ID";
+  const head = $("groupHead");
+  head.replaceChildren();
+  if (owner && g.admin && !mine) {
+    // Fiche de l'administrateur : rôle, ultra-admin, statut, son code.
+    head.append(el("div", {class: "grouphead"},
+      el("h4", {class: "muted", style: "margin:10px 0 0;text-transform:uppercase;letter-spacing:.12em;font-size:11px", text: "Fiche de l'administrateur" + (g.admin.code ? " · code " + g.admin.code : "")}),
+      userCard(g.admin)));
+  } else if (!g.admin && owner) {
+    head.append(el("p", {class: "hint", text: "Clients qui n'ont pas encore entré de code. Rattache-les à un administrateur avec le menu « Administrateur »."}));
+  }
+  renderUsers();
+}
+
+$("filter").classList.add("hidden");
 
 $("copycode").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText(admin.me.code); toast("Code copié", "good"); }
@@ -1049,17 +1180,14 @@ $("refreshDialogs").addEventListener("click", async () => {
 
 // ---------------------------------------------------------------- utilisateurs
 function renderUsers() {
+  if (!groupData) return renderAdminList();
   const q = $("search").value.trim().toLowerCase();
   const f = $("filter").value;
-  const all = admin.users;
+  const all = groupData.users;
   const counts = {pending: 0, active: 0, mt5: 0};
   all.forEach(u => { if (u.status === "pending") counts.pending++; if (u.status === "active") counts.active++; if (u.mt5 && u.mt5.status === "connected") counts.mt5++; });
-  $("userStats").textContent = `${all.length} personne(s) · ${counts.active} active(s) · ${counts.pending} en attente · ${counts.mt5} MT5 connecté(s)`;
-  $("pendingBadge").textContent = counts.pending;
-  $("pendingBadge").classList.toggle("hidden", !counts.pending);
+  $("userStats").textContent = `${all.length} client(s) · ${counts.active} actif(s) · ${counts.pending} en attente · ${counts.mt5} MT5 connecté(s)`;
   const list = all.filter(u => {
-    if (f === "admins" && !(u.role === "admin" || u.role === "super_admin")) return false;
-    if (f === "noadmin" && (u.referrer || u.role !== "user")) return false;
     if (["pending", "active", "revoked"].includes(f) && u.status !== f) return false;
     if (!q) return true;
     return [u.full_name, u.username, String(u.telegram_id)].some(x => x && String(x).toLowerCase().includes(q));
@@ -1067,18 +1195,20 @@ function renderUsers() {
   const box = $("users");
   box.replaceChildren();
   if (!list.length) {
-    box.append(emptyBox(admin.me.is_owner ? "Aucun utilisateur." : "Aucun client pour l'instant : partage ton code de parrainage."));
+    box.append(emptyBox(all.length ? "Aucun client ne correspond." : "Aucun client pour l'instant : partage le code de parrainage."));
     return;
   }
   for (const u of list) box.append(userCard(u));
 }
-$("search").addEventListener("input", () => admin && renderUsers());
+$("search").addEventListener("input", () => { if (!admin) return; if (adminGroup === null) renderAdminList(); else if (groupData) renderUsers(); });
 $("filter").addEventListener("change", () => admin && renderUsers());
 
 function userCard(u) {
   const owner = admin.me.is_owner;
   const isMe = u.telegram_id === admin.me.telegram_id;
   const isOwnerRow = u.role === "super_admin";
+  // v7 : seul le propriétaire peut modifier un ultra-administrateur.
+  const locked = isOwnerRow || (u.is_ultra && !admin.me.is_super);
   const mt5 = u.mt5;
   const mt5Text = !mt5 ? "MT5 non connecté"
     : mt5.status === "connected" ? `MT5 ${mt5.login}`
@@ -1091,15 +1221,17 @@ function userCard(u) {
         el("div", {class: "muted", text: (u.username ? "@" + u.username + " · " : "") + "ID " + u.telegram_id})),
       badge(LABELS.status[u.status] || u.status, STATUS_CLASS[u.status])),
     el("div", {class: "badges"},
-      badge(LABELS.role[u.role] || u.role, (u.role === "user" ? "" : "blue") + " nodot"),
-      owner && u.role === "user" ? badge(u.referrer ? "Admin : " + u.referrer.name : "Sans admin", (u.referrer ? "" : "wait") + " nodot") : null,
+      badge(roleLabel(u), (u.role === "user" ? "" : "blue") + " nodot"),
       badge(mt5Text, !mt5 ? "" : mt5.status === "connected" ? "ok" : mt5.status === "error" ? "err" : "wait"))
   );
   if (u.stats) card.append(statsBlock(u.stats));
 
   const grid = el("div", {class: "grid"});
-  if (!isMe && !isOwnerRow && (owner || u.role === "user")) grid.append(selectField("Statut", u.status, ["pending", "active", "revoked"], LABELS.status, v => changeStatus(u, v)));
-  if (owner && !isOwnerRow) grid.append(selectField("Rôle", u.role, ["user", "admin"], LABELS.role, v => changeRole(u, v)));
+  if (!isMe && !locked && (owner || u.role === "user")) grid.append(selectField("Statut", u.status, ["pending", "active", "revoked"], LABELS.status, v => changeStatus(u, v)));
+  if (owner && !isMe && !locked) {
+    const roles = admin.me.is_super ? ["user", "admin", "ultra"] : ["user", "admin"];
+    grid.append(selectField("Rôle", u.is_ultra ? "ultra" : u.role, roles, LABELS.role, v => changeRole(u, v)));
+  }
   if (owner && u.role === "user") {
     const opts = {"": "— Aucun —"};
     admin.admins.forEach(a => opts[a.telegram_id] = a.name);
@@ -1162,7 +1294,18 @@ async function changeStatus(u, v) {
   toast("Statut enregistré", "good"); await loadAdmin();
 }
 async function changeRole(u, v) {
+  if (v === "ultra") {
+    if (!await confirmBox(`Nommer ${u.full_name} ultra-administrateur ? Il aura exactement les mêmes droits que toi : tous les utilisateurs, les sources, le mode réel et l'arrêt d'urgence.`)) return false;
+    await post(`/admin/users/${u.telegram_id}/ultra`, {ultra: true});
+    toast("Ultra-administrateur nommé", "good"); await loadAdmin(); return;
+  }
+  if (u.is_ultra && v === "admin") {
+    if (!await confirmBox(`Retirer les droits d'ultra-administrateur à ${u.full_name} ? Il reste administrateur avec ses clients.`)) return false;
+    await post(`/admin/users/${u.telegram_id}/ultra`, {ultra: false});
+    toast("Droits d'ultra-administrateur retirés", "good"); await loadAdmin(); return;
+  }
   if (v === "admin" && !await confirmBox(`Nommer ${u.full_name} administrateur ? Un code de parrainage lui sera créé et envoyé.`)) return false;
+  if (v === "user" && u.role !== "user" && !await confirmBox(`Retirer le rôle d'administrateur à ${u.full_name} ? Il redevient client.`)) return false;
   await post(`/admin/users/${u.telegram_id}/role`, {role: v});
   toast(v === "admin" ? "Administrateur nommé, son code lui a été envoyé" : "Rôle retiré", "good"); await loadAdmin();
 }
@@ -1179,7 +1322,11 @@ if (tg) {
   tg.expand();
   try { tg.setHeaderColor("#060504"); tg.setBackgroundColor("#060504"); if (tg.setBottomBarColor) tg.setBottomBarColor("#080706"); } catch (e) {}
   try { if (tg.disableVerticalSwipes) tg.disableVerticalSwipes(); } catch (e) {}
-  if (tg.BackButton) tg.BackButton.onClick(() => showTab("home"));
+  if (tg.BackButton) tg.BackButton.onClick(() => {
+    // Dans Admin, le bouton retour referme d'abord la liste des clients d'un administrateur.
+    if (currentTab === "admin" && admin && admin.me.is_owner && adminGroup !== null) closeGroup();
+    else showTab("home");
+  });
   const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
   if (u) {
     $("hello").textContent = u.first_name;
