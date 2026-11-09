@@ -449,6 +449,8 @@ details.policy ul{padding-left:18px;margin:4px 0}
       <p>Les raisons les plus courantes : compte MT5 déconnecté, copie en pause, limite du jour atteinte, prix déjà au-delà du SL, ou canal non suivi. Le message reçu sur Telegram donne la raison exacte.</p></details>
     <details class="policy"><summary>Qui règle les TP, le BE et le trailing ?</summary>
       <p>Toi, tu choisis les TP que tu vises et la taille de tes positions, dans Compte. Ton administrateur règle le break-even et le trailing pour chaque canal ; tu les vois dans Compte &gt; Mes canaux et mes TP.</p></details>
+    <details class="policy"><summary>Qu'est-ce que la copie proportionnelle ?</summary>
+      <p>Sur certains canaux, ton lot n'est pas fixe : il est calculé comme le trader, en proportion de ton capital. Lot = lot du trader × ton capital ÷ capital du trader, toujours arrondi vers le bas pour garder de la marge. Si ton compte est trop petit pour le lot minimum, le trade n'est pas copié et tu es prévenu.</p></details>
     <details class="policy"><summary>Pourquoi je ne peux poser qu'une question toutes les 4 h 30 ?</summary>
       <p>Pour que la discussion reste lisible et que chacun ait une réponse. Tu peux commenter les messages autant que tu veux.</p></details>
   </section>
@@ -997,6 +999,11 @@ function renderLot() {
   if (!copied.length) return;
   box.append(el("label", {text: "Lot par TP pour un canal précis (facultatif)"}));
   for (const src of copied) {
+    if (src.lot_mode === "proportional") {
+      box.append(el("div", {class: "lotrow"}, el("span", {text: src.name}),
+        el("span", {class: "muted", style: "flex:none;text-align:right", text: "Proportionnel à ton capital"})));
+      continue;
+    }
     const inp = el("input", {inputmode: "decimal", placeholder: String(st.lot_per_tp ?? def), value: src.lot_per_tp ? String(src.lot_per_tp) : ""});
     const save = el("button", {class: "btn sm", text: "OK", onclick: async ev => {
       const v = inp.value.trim();
@@ -1260,6 +1267,35 @@ async function updateSource(id, body, okText) {
   catch (e) { toast(e.message, "bad"); renderSources(); }
 }
 
+// v8 : lot fixe choisi par chaque client, ou proportionnel au capital (propriétaire et ultra-admins)
+function lotModeSelect(s) {
+  const sel = el("select", {},
+    el("option", {value: "fixed", text: "Lot choisi par chaque client"}),
+    el("option", {value: "proportional", text: "Proportionnelle au capital (lot du trader × capital du client ÷ capital du trader)"}));
+  sel.value = s.lot_mode || "fixed";
+  sel.addEventListener("change", async () => {
+    if (sel.value === "proportional" && !await confirmBox(`Copie proportionnelle pour « ${s.name} » ? Le lot de chaque client sera calculé à partir des LOTS et du CAPITAL du message et de l'equity de son compte, arrondi vers le bas. Les clients ne pourront plus choisir leur lot sur ce canal.`)) { sel.value = s.lot_mode || "fixed"; return; }
+    updateSource(s.id, {lot_mode: sel.value}, sel.value === "proportional" ? "Copie proportionnelle activée" : "Lot choisi par les clients");
+  });
+  return sel;
+}
+
+// v9 : part du capital utilisée par les copieurs après les retraits du trader
+function capitalFactorBox(s) {
+  if ((s.lot_mode || "fixed") !== "proportional") return null;
+  const f = Number(s.capital_factor || 1);
+  const pct = (Math.round(f * 1000) / 10).toString().replace(".", ",") + " %";
+  const box = el("div", {class: "rulesum"},
+    el("span", {text: f < 0.9999
+      ? `Capital utilisé par les copieurs : ${pct} (tu as retiré de l'argent). Un compte de 2 000 € est compté comme ${Math.floor(2000 * f).toLocaleString("fr-FR")} €.`
+      : "Capital utilisé par les copieurs : 100 %. Quand tu retires de l'argent, la part baisse toute seule pour tous les copieurs."}));
+  if (f < 0.9999) box.append(el("button", {class: "btn sm", style: "margin-top:6px", text: "Revenir à 100 %", onclick: async () => {
+    if (!await confirmBox(`Revenir à 100 % sur « ${s.name} » ? Les copieurs calculeront de nouveau leurs lots sur tout leur capital, et ils seront prévenus.`)) return;
+    updateSource(s.id, {capital_factor: 1}, "Capital utilisé : 100 %");
+  }}));
+  return box;
+}
+
 function renderSources() {
   const box = $("sources");
   box.replaceChildren();
@@ -1301,6 +1337,7 @@ function renderSources() {
         badge(s.chat ? "Écoutée" : "Sans canal", s.chat ? "ok" : "wait")),
       el("label", {text: "Canal Telegram écouté"}), select,
       el("label", {text: "Admins autorisés"}), checks,
+      el("label", {text: "Taille des positions des clients"}), lotModeSelect(s), capitalFactorBox(s),
       el("p", {class: "hint", text: `${s.clients} client(s) · dernier signal : ${ls ? ago(ls.at) + " — « " + ls.text.replace(/\s+/g, " ") + " »" : "jamais"}`}),
       el("button", {class: "btn sm danger", style: "margin-top:6px", text: "Supprimer la source", onclick: async () => {
         if (!await confirmBox(`Supprimer la source « ${s.name} » ? Ses ${s.clients} client(s) ne recevront plus ses signaux.`)) return;
@@ -1625,6 +1662,8 @@ function renderClientRules() {
       toast(tps ? `${s.name} : ${tps.map(t => "TP" + t).join(", ")}` : `${s.name} : tous les TP`, "good");
     }),
     el("p", {class: "hint", text: "Si un signal a moins de TP que ton choix, son dernier TP est pris."}),
+    s.lot_mode === "proportional" ? el("p", {class: "hint", text: "Lot : proportionnel à ton capital. Si le trader engage 5 % de son capital, ton compte aussi (arrondi vers le bas)."}) : null,
+    s.lot_mode === "proportional" && Number(s.capital_factor || 1) < 0.9999 ? el("p", {class: "hint", text: `Le trader a retiré de l'argent : tes lots sont calculés sur ${(Math.round(Number(s.capital_factor) * 1000) / 10).toString().replace(".", ",")} % de ton capital.`}) : null,
     el("div", {class: "rulesum", text: "Réglé par ton administrateur : " + (s.rules || "—")}));
   }));
 }
