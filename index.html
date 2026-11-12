@@ -288,6 +288,7 @@ details.policy ul{padding-left:18px;margin:4px 0}
 </header>
 
 <main>
+<div id="acctSwitch" class="hidden" style="display:flex;gap:8px;margin:0 0 12px"></div>
 <!-- ============ ACCUEIL ============ -->
 <div id="tab-home" class="view">
   <div>
@@ -413,6 +414,17 @@ details.policy ul{padding-left:18px;margin:4px 0}
       <button class="btn sm" id="saveLot">Enregistrer</button>
     </div>
     <div id="lotSources"></div>
+  </section>
+
+  <section class="card hidden" id="limitcard">
+    <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg>Limites du jour</h2>
+    <p class="hint">Dès que le résultat du jour (trades fermés + positions en cours) atteint une limite, toutes les positions du bot sont fermées (le gain est gardé, la perte est arrêtée) et plus aucun trade n'est copié jusqu'à 00h01 (heure de Paris). Montants dans la devise de ton compte. Laisse vide pour ne pas avoir de limite.</p>
+    <div id="limitState"></div>
+    <label for="limGain">Gain max du jour</label>
+    <input id="limGain" inputmode="decimal" placeholder="ex : 500 (aucune limite)">
+    <label for="limLoss">Perte max du jour</label>
+    <input id="limLoss" inputmode="decimal" placeholder="ex : 200 (aucune limite)">
+    <div class="btnrow"><button class="btn sm" id="saveLimits">Enregistrer</button></div>
   </section>
 
   <section class="card hidden" id="rulescard">
@@ -687,15 +699,35 @@ function confirmBox(text) {
 }
 const isAdminUser = () => me && (me.role === "admin" || me.role === "super_admin");
 
+// v11 : 2e compte MT5 (choix mémorisé sur ce téléphone)
+let ACCOUNT_NO = 1;
+try { ACCOUNT_NO = localStorage.getItem("acct") === "2" ? 2 : 1; } catch (e) {}
+const ACCOUNT_PATHS = /^\/(me($|\?)|mt5|my\/)/;
+function switchAccount(n) {
+  try { if (n === 2) localStorage.setItem("acct", "2"); else localStorage.removeItem("acct"); } catch (e) {}
+  location.reload();
+}
+function renderAcctSwitch() {
+  const box = $("acctSwitch");
+  if (!me || !me.second_allowed) { box.classList.add("hidden"); return; }
+  box.classList.remove("hidden");
+  box.replaceChildren(...[1, 2].map(n => el("button", {
+    class: "btn sm" + (n === ACCOUNT_NO ? "" : " ghost"), style: "flex:1",
+    text: n === 1 ? "Compte 1" : "Compte 2", onclick: () => { if (n !== ACCOUNT_NO) switchAccount(n); }})));
+}
+
 async function api(path, options = {}) {
   if (API_URL.startsWith("COLLE")) throw new Error("Adresse de l'API non configurée");
+  const second = ACCOUNT_NO === 2 && ACCOUNT_PATHS.test(path);
   const res = await fetch(API_URL + path, {
     ...options,
-    headers: {"Authorization": "tma " + tg.initData, ...(options.body ? {"Content-Type": "application/json"} : {})}
+    headers: {"Authorization": "tma " + tg.initData, ...(second ? {"X-Account": "2"} : {}),
+              ...(options.body ? {"Content-Type": "application/json"} : {})}
   });
   let data = {};
   try { data = await res.json(); } catch (e) {}
   if (!res.ok) {
+    if (second && res.status === 403 && String(data.detail || "").startsWith("2e compte")) { switchAccount(1); }
     const detail = Array.isArray(data.detail) ? "Champs invalides" : (data.detail || "Erreur " + res.status);
     throw Object.assign(new Error(detail), {status: res.status});
   }
@@ -870,16 +902,18 @@ async function loadAccount() {
   }
   try { me = await api("/me"); }
   catch (e) {
-    setPill(e.status ? "Accès refusé" : "Hors ligne", "err");
-    const txt = e.status ? e.message : "Impossible de joindre le serveur. Le PC, l'API et le tunnel sont-ils allumés ?";
+    const denied = e.status && e.status < 500;   // 5xx = tunnel / serveur, pas un refus
+    setPill(denied ? "Accès refusé" : "Hors ligne", "err");
+    const txt = denied ? e.message : "Impossible de joindre le serveur (il vient peut-être d'être relancé). Réessaie dans quelques secondes.";
     message(box, txt);
-    $("hero").replaceChildren(el("div", {class: "eyebrow", text: e.status ? "Accès refusé" : "Serveur injoignable"}), el("p", {text: txt}),
+    $("hero").replaceChildren(el("div", {class: "eyebrow", text: denied ? "Accès refusé" : "Serveur injoignable"}), el("p", {text: txt}),
       el("button", {class: "btn", text: "Réessayer", onclick: () => location.reload()}));
     $("steps").replaceChildren(); $("homeOpen").replaceChildren(emptyBox("—"));
     haptic("error");
     return;
   }
   renderMe();
+  renderAcctSwitch();
   loadChatBadge();
   $("mt5card").classList.remove("hidden");
   loadMt5();
@@ -986,8 +1020,32 @@ async function loadLot() {
   try { lotData = await api("/my/overview"); renderLot(); }
   catch (e) { $("lotcard").classList.add("hidden"); }
 }
+function renderLimits() {
+  $("limitcard").classList.remove("hidden");   // chaque compte règle ses propres limites du jour
+  const st = lotData.settings || {};
+  $("limGain").value = st.daily_max_gain ?? "";
+  $("limLoss").value = st.daily_max_loss ?? "";
+  const blk = lotData.stats && lotData.stats.limit_block;
+  $("limitState").replaceChildren(blk ? el("p", {class: "hint", style: "color:var(--bad, #e5534b)", text: `🛑 Limite du jour atteinte (${blk.reason}) : plus aucun trade copié jusqu'à 00h01.`}) : "");
+}
+$("saveLimits").addEventListener("click", async ev => {
+  const g = $("limGain").value.trim(), l = $("limLoss").value.trim();
+  if (g && !(parseNum(g) > 0)) return toast("Gain max : un montant positif", "bad");
+  if (l && !(parseNum(l) > 0)) return toast("Perte max : un montant positif", "bad");
+  const btn = ev.currentTarget; spinBtn(btn, true);
+  try {
+    lotData = await post("/my/settings", {
+      ...(g ? {daily_max_gain: parseNum(g)} : {clear_gain: true}),
+      ...(l ? {daily_max_loss: parseNum(l)} : {clear_loss: true}),
+    });
+    renderLot(); toast("Limites du jour enregistrées", "good");
+  } catch (e) { toast(e.message, "bad"); }
+  finally { spinBtn(btn, false, "Enregistrer"); }
+});
+
 function renderLot() {
   $("lotcard").classList.remove("hidden");
+  renderLimits();
   const st = lotData.settings || {};
   const def = (lotData.mt5 && lotData.mt5.lot_per_tp) || 0.01;
   $("lotTp").value = st.lot_per_tp ?? "";
@@ -1438,6 +1496,19 @@ function userCard(u) {
     card.append(el("label", {text: "Signaux suivis"}), checks);
   } else if (u.sources.length) {
     card.append(el("p", {class: "hint", text: "Signaux suivis : " + u.sources.map(s => s.name).join(", ")}));
+  }
+
+  if (u.parent_id) card.querySelector(".badges").append(badge("2e compte", "blue nodot"));
+  if (owner && !u.parent_id && u.role !== "super_admin" || (owner && isMe && !u.parent_id)) {
+    // v11 : autoriser un 2e compte MT5 (propriétaire et ultra-admins)
+    const sec = el("button", {class: "btn ghost", style: "min-height:42px;margin-top:12px",
+      text: u.allow_second ? "Retirer le 2e compte MT5" : "Autoriser un 2e compte MT5"});
+    sec.addEventListener("click", async () => {
+      if (u.allow_second && !await confirmBox(`Retirer le 2e compte de ${u.full_name} ? Sa copie sera arrêtée.`)) return;
+      try { await post(`/admin/users/${u.telegram_id}/second`, {allowed: !u.allow_second}); toast(u.allow_second ? "2e compte retiré" : "2e compte autorisé", "good"); await loadAdmin(); }
+      catch (e) { toast(e.message, "bad"); }
+    });
+    card.append(sec);
   }
 
   if (u.role === "user" && !isMe) {
