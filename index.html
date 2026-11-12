@@ -1287,10 +1287,10 @@ function capitalFactorBox(s) {
   const pct = (Math.round(f * 1000) / 10).toString().replace(".", ",") + " %";
   const box = el("div", {class: "rulesum"},
     el("span", {text: f < 0.9999
-      ? `Capital utilisé par les copieurs : ${pct} (tu as retiré de l'argent). Un compte de 2 000 € est compté comme ${Math.floor(2000 * f).toLocaleString("fr-FR")} €.`
-      : "Capital utilisé par les copieurs : 100 %. Quand tu retires de l'argent, la part baisse toute seule pour tous les copieurs."}));
+      ? `Tu as retiré de l'argent depuis le dernier retour à 100 % (il te reste ${pct} de ton capital de départ). À chaque retrait, chaque copieur a mis de côté le même % de son capital utilisé.`
+      : "Capital utilisé par les copieurs : 100 %. Quand tu retires X % de ton capital, chaque copieur met de côté X % de son capital utilisé."}));
   if (f < 0.9999) box.append(el("button", {class: "btn sm", style: "margin-top:6px", text: "Revenir à 100 %", onclick: async () => {
-    if (!await confirmBox(`Revenir à 100 % sur « ${s.name} » ? Les copieurs calculeront de nouveau leurs lots sur tout leur capital, et ils seront prévenus.`)) return;
+    if (!await confirmBox(`Revenir à 100 % sur « ${s.name} » ? Ce qui a été mis de côté chez les copieurs est remis à 0 : ils calculeront de nouveau leurs lots sur tout leur capital, et ils seront prévenus.`)) return;
     updateSource(s.id, {capital_factor: 1}, "Capital utilisé : 100 %");
   }}));
   return box;
@@ -1663,7 +1663,7 @@ function renderClientRules() {
     }),
     el("p", {class: "hint", text: "Si un signal a moins de TP que ton choix, son dernier TP est pris."}),
     s.lot_mode === "proportional" ? el("p", {class: "hint", text: "Lot : proportionnel à ton capital. Si le trader engage 5 % de son capital, ton compte aussi (arrondi vers le bas)."}) : null,
-    s.lot_mode === "proportional" && Number(s.capital_factor || 1) < 0.9999 ? el("p", {class: "hint", text: `Le trader a retiré de l'argent : tes lots sont calculés sur ${(Math.round(Number(s.capital_factor) * 1000) / 10).toString().replace(".", ",")} % de ton capital.`}) : null,
+    s.lot_mode === "proportional" && Number(s.reserved || 0) > 0 ? el("p", {class: "hint", text: `Le trader a retiré de l'argent : ${Number(s.reserved).toLocaleString("fr-FR", {maximumFractionDigits: 2})} sont mis de côté sur ton compte pour ce canal. Tes lots sont calculés sur le reste de ton capital.`}) : null,
     el("div", {class: "rulesum", text: "Réglé par ton administrateur : " + (s.rules || "—")}));
   }));
 }
