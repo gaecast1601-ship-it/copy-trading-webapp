@@ -554,6 +554,31 @@ details.policy ul{padding-left:18px;margin:4px 0}
     <div id="users"><span class="skel" style="height:60px;margin-top:16px;border-radius:12px"></span></div>
   </section>
 
+  <!-- v16 : résultats de chaque client entre deux dates -->
+  <section class="card" id="statscard">
+    <div class="cardhead">
+      <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>Résultats par période</h2>
+    </div>
+    <p class="hint">Choisis les dates : le gain ou la perte, le % de réussite et le nombre de trades de chaque client sur cette période (heure de Paris, jours inclus).</p>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1;min-width:0"><label for="statStart">Du</label><input type="date" id="statStart" style="width:100%;min-width:0;box-sizing:border-box;font-size:14px;padding-left:10px;padding-right:6px"></div>
+      <div style="flex:1;min-width:0"><label for="statEnd">Au</label><input type="date" id="statEnd" style="width:100%;min-width:0;box-sizing:border-box;font-size:14px;padding-left:10px;padding-right:6px"></div>
+    </div>
+    <label for="statFilter">Trades pris en compte</label>
+    <select id="statFilter">
+      <option value="bot">Copiés par le bot</option>
+      <option value="all">Tous (bot + manuels)</option>
+    </select>
+    <div class="btnrow" style="margin-top:10px;grid-template-columns:1fr 1fr 1fr">
+      <button class="btn sm ghost" data-range="today">Aujourd'hui</button>
+      <button class="btn sm ghost" data-range="7">7 jours</button>
+      <button class="btn sm ghost" data-range="month">Ce mois</button>
+    </div>
+    <button class="btn" id="statGo" style="margin-top:10px">Afficher</button>
+    <div id="statSummary" class="muted" style="margin-top:10px"></div>
+    <div id="statRows"></div>
+  </section>
+
   <section class="card card-gold">
     <h2 class="cardtitle"><svg class="i" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 9.2-9.2M17 6l3 3M15 8l2 2"/></svg>Mon code de parrainage</h2>
     <p>Donne ce code à tes clients : en l'entrant dans l'application, ils sont rattachés à toi. Il ne sert qu'une fois : dès qu'un client l'utilise, tu reçois un nouveau code.</p>
@@ -1180,7 +1205,7 @@ async function loadAdmin(full = false) {
   $("pendingBadge").textContent = admin.pending;
   $("pendingBadge").classList.toggle("hidden", !admin.pending);
   if (admin.me.is_owner) { renderCopy(admin.copy); if (full) loadSources(); }
-  if (full) { loadMyChannels(); loadRulesAdmin(); }
+  if (full) { loadMyChannels(); loadRulesAdmin(); loadStats(); }
   if (!admin.me.is_owner) adminGroup = admin.me.telegram_id;   // un admin normal voit directement ses clients
   if (adminGroup === null) renderAdminList(); else await loadGroup();
   adminTimer = setTimeout(() => { if (currentTab === "admin") refreshAdmin(); }, 30000);
@@ -1261,6 +1286,49 @@ function closeGroup() {
   $("peoplecard").scrollIntoView({behavior: "smooth", block: "start"});
 }
 $("groupBack").addEventListener("click", closeGroup);
+
+// ---- v16 : résultats par période
+function isoDay(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function setStatRange(kind) {
+  const now = new Date(), from = new Date(now);
+  if (kind === "7") from.setDate(now.getDate() - 6);
+  else if (kind === "month") from.setDate(1);
+  $("statStart").value = isoDay(from); $("statEnd").value = isoDay(now);
+}
+setStatRange("month");
+document.querySelectorAll("#statscard [data-range]").forEach(b =>
+  b.addEventListener("click", () => { haptic("select"); setStatRange(b.dataset.range); loadStats(); }));
+async function loadStats() {
+  const start = $("statStart").value, end = $("statEnd").value;
+  if (!start || !end) return toast("Choisis les deux dates", "bad");
+  if (end < start) return toast("La date de fin doit être après la date de début", "bad");
+  const btn = $("statGo"); spinBtn(btn, true, "Calcul…");
+  try {
+    const d = await api(`/admin/stats?start=${start}&end=${end}&filter=${$("statFilter").value}`);
+    const box = $("statRows"); box.replaceChildren();
+    const active = d.rows.filter(r => r.trades > 0);
+    const byCur = {};
+    for (const r of active) { const c = r.currency || "?"; byCur[c] = (byCur[c] || 0) + r.result; }
+    const totals = Object.entries(byCur).map(([c, v]) => (v >= 0 ? "+" : "") + v.toFixed(2) + " " + c).join(" · ");
+    $("statSummary").textContent = active.length
+      ? `${active.length} client(s) avec des trades · total ${totals}`
+      : "Aucun trade sur cette période.";
+    for (const r of d.rows) {
+      const cur = r.currency || "";
+      const res = r.trades ? (r.result >= 0 ? "+" : "") + r.result.toFixed(2) + " " + cur : "—";
+      const sub = r.trades
+        ? `${r.trades} trade(s) · ${r.wins} gagnant(s) · ${r.losses} perdant(s)` + (r.winrate !== null ? ` · ${r.winrate} % réussite` : "")
+        : "Aucun trade sur la période";
+      box.append(el("div", {class: "row", style: "align-items:flex-start;gap:10px"},
+        el("span", {style: "flex:1;min-width:0"},
+          el("b", {text: r.name}), el("br"),
+          el("span", {class: "muted", style: "font-size:12px", text: sub})),
+        el("b", {class: r.trades ? (r.result >= 0 ? "pos" : "neg") : "muted", style: "white-space:nowrap", text: res})));
+    }
+  } catch (e) { toast(e.message, "bad"); }
+  finally { spinBtn(btn, false, "Afficher"); }
+}
+$("statGo").addEventListener("click", () => { haptic("light"); loadStats(); });
 $("refreshPeople").addEventListener("click", () => { haptic("light"); loadAdmin(); });
 
 // ---- un administrateur et ses clients
@@ -1278,7 +1346,7 @@ function renderGroup() {
   const owner = admin.me.is_owner;
   const g = groupData;
   const mine = g.admin_id === admin.me.telegram_id;
-  $("usersTitle").textContent = !owner || mine ? "Mes clients" : g.admin ? "Clients de " + g.admin.name : "Sans administrateur";
+  $("usersTitle").textContent = g.all_clients ? "Tous les clients" : !owner || mine ? "Mes clients" : g.admin ? "Clients de " + g.admin.name : "Sans administrateur";
   $("groupBack").classList.toggle("hidden", !owner);
   $("filter").classList.remove("hidden");
   $("search").placeholder = "Nom, @pseudo ou ID";
