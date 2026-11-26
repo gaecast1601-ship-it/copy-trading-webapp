@@ -548,6 +548,7 @@ details.policy ul{padding-left:18px;margin:4px 0}
         <option value="pending">En attente</option>
         <option value="active">Actifs</option>
         <option value="revoked">Révoqués</option>
+        <option value="mine" id="filterMine" hidden disabled>Mes clients uniquement</option>
       </select>
     </div>
     <div id="groupHead"></div>
@@ -1346,7 +1347,9 @@ function renderGroup() {
   const owner = admin.me.is_owner;
   const g = groupData;
   const mine = g.admin_id === admin.me.telegram_id;
-  $("usersTitle").textContent = g.all_clients ? "Tous les clients" : !owner || mine ? "Mes clients" : g.admin ? "Clients de " + g.admin.name : "Sans administrateur";
+  { const o = $("filterMine"); o.hidden = o.disabled = !g.all_clients; }
+  if (!g.all_clients && $("filter").value === "mine") $("filter").value = "all";
+  $("usersTitle").textContent = g.all_clients ? ($("filter").value === "mine" ? "Mes clients" : "Tous les clients") : !owner || mine ? "Mes clients" : g.admin ? "Clients de " + g.admin.name : "Sans administrateur";
   $("groupBack").classList.toggle("hidden", !owner);
   $("filter").classList.remove("hidden");
   $("search").placeholder = "Nom, @pseudo ou ID";
@@ -1510,7 +1513,8 @@ function renderUsers() {
   if (!groupData) return renderAdminList();
   const q = $("search").value.trim().toLowerCase();
   const f = $("filter").value;
-  const all = groupData.users;
+  // v16b : un admin qui voit tous les clients peut n'afficher que les siens
+  const all = f === "mine" ? groupData.users.filter(u => u.referrer_admin_id === admin.me.telegram_id) : groupData.users;
   const counts = {pending: 0, active: 0, mt5: 0};
   all.forEach(u => { if (u.status === "pending") counts.pending++; if (u.status === "active") counts.active++; if (u.mt5 && u.mt5.status === "connected") counts.mt5++; });
   $("userStats").textContent = `${all.length} client(s) · ${counts.active} actif(s) · ${counts.pending} en attente · ${counts.mt5} MT5 connecté(s)`;
@@ -1572,7 +1576,7 @@ function userRow(u) {
   return [row, open];
 }
 $("search").addEventListener("input", () => { if (!admin) return; if (adminGroup === null) renderAdminList(); else if (groupData) renderUsers(); });
-$("filter").addEventListener("change", () => admin && renderUsers());
+$("filter").addEventListener("change", () => admin && (groupData ? renderGroup() : renderUsers()));
 
 function userCard(u) {
   const owner = admin.me.is_owner;
